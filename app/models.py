@@ -1,0 +1,123 @@
+from datetime import UTC, date, datetime
+from enum import StrEnum
+
+from sqlmodel import Field, SQLModel
+
+
+def utcnow() -> datetime:
+    return datetime.now(UTC)
+
+
+class Sex(StrEnum):
+    male = "male"
+    female = "female"
+
+
+class ActivityLevel(StrEnum):
+    sedentary = "sedentary"
+    light = "light"
+    moderate = "moderate"
+    active = "active"
+    very_active = "very_active"
+
+
+class Goal(StrEnum):
+    cut = "cut"
+    maintain = "maintain"
+    bulk = "bulk"
+
+
+class MealType(StrEnum):
+    breakfast = "breakfast"
+    lunch = "lunch"
+    dinner = "dinner"
+    snack = "snack"
+
+
+# ---------- Users ----------
+class User(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    email: str = Field(index=True, unique=True)
+    name: str
+    hashed_password: str
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class Profile(SQLModel, table=True):
+    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    sex: Sex
+    age: int
+    height_cm: float
+    weight_kg: float
+    activity_level: ActivityLevel = ActivityLevel.moderate
+    goal: Goal = Goal.maintain
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+# ---------- Workouts ----------
+class WorkoutPlan(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    split: str
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class PlanDay(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    plan_id: int = Field(foreign_key="workoutplan.id", index=True, ondelete="CASCADE")
+    weekday: int  # 0 = Monday ... 6 = Sunday (ISO, like Python's date.weekday())
+    day_type: str  # e.g. "push", "upper_a"
+
+
+class PlanExercise(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    plan_day_id: int = Field(foreign_key="planday.id", index=True, ondelete="CASCADE")
+    exercise_key: str
+    sets: int
+    reps: str  # "8-12", "5", "30-45s"
+    position: int = 0
+
+
+class WorkoutLog(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    plan_day_id: int | None = Field(default=None, foreign_key="planday.id")
+    day: date = Field(index=True)
+    notes: str | None = None
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class SetLog(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    workout_log_id: int = Field(foreign_key="workoutlog.id", index=True, ondelete="CASCADE")
+    exercise_key: str = Field(index=True)
+    set_number: int
+    weight_kg: float
+    reps: int
+
+
+# ---------- Nutrition ----------
+class Food(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name_ar: str
+    name_en: str
+    # values per 100 g
+    calories: float
+    protein: float
+    carbs: float
+    fat: float
+    serving_g: float = 100
+    serving_ar: str = "١٠٠ غ"
+    serving_en: str = "100 g"
+    owner_id: int | None = Field(default=None, foreign_key="user.id", index=True)  # None = built-in
+
+
+class MealEntry(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    food_id: int = Field(foreign_key="food.id")
+    day: date = Field(index=True)
+    meal_type: MealType
+    grams: float
+    created_at: datetime = Field(default_factory=utcnow)
