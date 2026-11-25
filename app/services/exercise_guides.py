@@ -407,3 +407,23 @@ GUIDES: dict[str, dict] = {
         "tip_en": "If it's too hard, start with bent knees.",
     },
 }
+
+
+def _add_library_guides() -> None:
+    """Merge the larger library's how-to text, taking each one's muscles from the exercise."""
+    from app.services.exercise_guides_more import GUIDE_TEXT
+    from app.services.workouts import EXERCISES
+
+    for key, (steps_ar, steps_en, tip_ar, tip_en) in GUIDE_TEXT.items():
+        ex = EXERCISES[key]
+        GUIDES[key] = {
+            "primary": ex["primary"],
+            "secondary": ex["secondary"],
+            "steps_ar": steps_ar,
+            "steps_en": steps_en,
+            "tip_ar": tip_ar,
+            "tip_en": tip_en,
+        }
+
+
+_add_library_guides()

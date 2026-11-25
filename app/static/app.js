@@ -89,7 +89,7 @@ const I18N = {
     adaptiveReady: "حسب بياناتك، حرقك اليومي الحقيقي تقريبًا <b>{est}</b> سعرة (المعادلة كانت تقول {formula}). معدل أكلك {avg} سعرة، ووزنك يتغير {weekly} كغ بالأسبوع.",
     applyCalories: "طبّق: {cal} سعرة باليوم", appliedLabel: "مطبّق ✓ أرقامك محسوبة من بياناتك", backToFormula: "ارجع للمعادلة",
     measuredBadge: "محسوب من بياناتك",
-    m_chest: "صدر", m_back: "ظهر", m_shoulders: "أكتاف", m_legs: "أرجل", m_arms: "ذراع", m_core: "بطن", m_cardio: "كارديو", m_other: "أخرى", todayTag: "اليوم",
+    m_chest: "صدر", m_back: "ظهر", m_shoulders: "أكتاف", m_legs: "أرجل", m_arms: "ذراع", m_biceps: "بايسبس", m_triceps: "ترايسبس", m_forearms: "ساعد", m_core: "بطن", m_cardio: "كارديو", m_other: "أخرى", todayTag: "اليوم",
     days: ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
     dayOrder: [5, 6, 0, 1, 2, 3, 4],
     daysShort: ["إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت", "أحد"],
@@ -183,7 +183,7 @@ const I18N = {
     adaptiveReady: "Based on your data, your real daily burn is about <b>{est}</b> kcal (the formula said {formula}). You've averaged {avg} kcal and your weight is changing {weekly} kg per week.",
     applyCalories: "Apply: {cal} kcal per day", appliedLabel: "Applied ✓ your numbers come from your own data", backToFormula: "Back to the formula",
     measuredBadge: "From your data",
-    m_chest: "Chest", m_back: "Back", m_shoulders: "Shoulders", m_legs: "Legs", m_arms: "Arms", m_core: "Core", m_cardio: "Cardio", m_other: "Other", todayTag: "Today",
+    m_chest: "Chest", m_back: "Back", m_shoulders: "Shoulders", m_legs: "Legs", m_arms: "Arms", m_biceps: "Biceps", m_triceps: "Triceps", m_forearms: "Forearms", m_core: "Core", m_cardio: "Cardio", m_other: "Other", todayTag: "Today",
     days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
     dayOrder: [0, 1, 2, 3, 4, 5, 6],
     daysShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -512,7 +512,7 @@ function workoutCard(w) {
 }
 
 // ---------------------------------------------------------------- plate calculator
-const BARBELL_EXERCISES = new Set(["squat", "deadlift", "bench_press", "overhead_press", "barbell_row", "romanian_deadlift", "barbell_curl"]);
+const BARBELL_EXERCISES = new Set(["squat", "front_squat", "deadlift", "sumo_deadlift", "rack_pull", "bench_press", "incline_bench_press", "decline_bench_press", "close_grip_bench", "overhead_press", "barbell_row", "romanian_deadlift", "good_morning", "hip_thrust", "barbell_shrug", "barbell_curl"]);
 const BAR_KG = 20;
 const PLATES = [25, 20, 15, 10, 5, 2.5, 1.25];
 const PLATE_SIZE = { 25: [9, 52], 20: [8, 52], 15: [7, 44], 10: [6, 36], 5: [5, 26], 2.5: [4, 20], 1.25: [3, 16] };
@@ -715,7 +715,7 @@ const afterRender = {
 };
 
 // ---------------------------------------------------------------- plan
-const MUSCLES = ["chest", "back", "shoulders", "legs", "arms", "core", "cardio", "other"];
+const MUSCLES = ["chest", "back", "shoulders", "biceps", "triceps", "forearms", "legs", "core", "cardio", "arms", "other"];
 
 function exerciseOptions() {
   const label = (e) => esc(isAr() ? e.ar : e.en);

@@ -199,6 +199,9 @@ GROUP_TO_MUSCLES = {
     "shoulders": ["shoulders"],
     "legs": ["quads", "hamstrings", "glutes"],
     "arms": ["biceps", "triceps"],
+    "biceps": ["biceps"],
+    "triceps": ["triceps"],
+    "forearms": ["forearms"],
     "core": ["abs"],
 }
 
@@ -215,8 +218,8 @@ def exercise_guide(key: str, user: CurrentUser, session: SessionDep):
         "ar": info["ar"],
         "en": info["en"],
         "muscle": info["muscle"],
-        "primary": guide["primary"] if guide else GROUP_TO_MUSCLES.get(info["muscle"], []),
-        "secondary": guide["secondary"] if guide else [],
+        "primary": guide["primary"] if guide else info.get("primary") or GROUP_TO_MUSCLES.get(info["muscle"], []),
+        "secondary": guide["secondary"] if guide else info.get("secondary", []),
         "steps_ar": guide["steps_ar"] if guide else [],
         "steps_en": guide["steps_en"] if guide else [],
         "tip_ar": guide["tip_ar"] if guide else None,

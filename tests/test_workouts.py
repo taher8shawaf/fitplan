@@ -245,3 +245,34 @@ def test_guide_endpoint(client, auth):
     ).json()["key"]
     custom = client.get(f"/api/exercises/{key}/guide", headers=auth).json()
     assert custom["steps_en"] == [] and custom["primary"] == ["quads", "hamstrings", "glutes"]
+
+
+def test_every_exercise_group_is_known_and_labelled():
+    from pathlib import Path
+
+    from app.services.workouts import EXERCISES, MUSCLES
+
+    js = (Path(__file__).parent.parent / "app/static/app.js").read_text()
+    assert {e["muscle"] for e in EXERCISES.values()} <= set(MUSCLES)
+    for m in MUSCLES:
+        assert js.count(f"m_{m}:") == 2, m  # Arabic and English labels
+
+
+def test_library_has_the_common_lifts():
+    from app.services.workouts import EXERCISES
+
+    for key in (
+        "incline_bench_press",
+        "db_bench_press",
+        "pec_deck",
+        "chest_dip",
+        "preacher_curl",
+        "skull_crusher",
+        "rope_pushdown",
+        "hip_thrust",
+        "hack_squat",
+        "t_bar_row",
+        "arnold_press",
+        "rear_delt_fly",
+    ):
+        assert key in EXERCISES, key

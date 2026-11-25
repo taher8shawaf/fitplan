@@ -2,39 +2,151 @@
 
 import re
 
-# key -> (Arabic name, English name, muscle group)
-EXERCISES: dict[str, dict[str, str]] = {
+
+# key -> Arabic name, English name, muscle group, and (for exercises without a
+# written guide) the muscles to highlight on the body map.
+def _ex(ar: str, en: str, muscle: str, primary: tuple[str, ...] = (), secondary: tuple[str, ...] = ()) -> dict:
+    entry: dict = {"ar": ar, "en": en, "muscle": muscle}
+    if primary:
+        entry["primary"] = list(primary)
+        entry["secondary"] = list(secondary)
+    return entry
+
+
+EXERCISES: dict[str, dict] = {
     # chest
-    "bench_press": {"ar": "ضغط صدر بالبار", "en": "Barbell Bench Press", "muscle": "chest"},
-    "incline_db_press": {"ar": "ضغط صدر علوي بالدمبل", "en": "Incline Dumbbell Press", "muscle": "chest"},
-    "cable_fly": {"ar": "تفتيح صدر بالكيبل", "en": "Cable Fly", "muscle": "chest"},
-    "push_up": {"ar": "ضغط", "en": "Push-up", "muscle": "chest"},
+    "bench_press": _ex("ضغط صدر بالبار", "Barbell Bench Press", "chest"),
+    "incline_bench_press": _ex(
+        "ضغط صدر علوي بالبار", "Incline Barbell Bench Press", "chest", ("chest", "shoulders"), ("triceps",)
+    ),
+    "decline_bench_press": _ex("ضغط صدر سفلي بالبار", "Decline Bench Press", "chest", ("chest",), ("triceps",)),
+    "db_bench_press": _ex("ضغط صدر بالدمبل", "Dumbbell Bench Press", "chest", ("chest",), ("triceps", "shoulders")),
+    "incline_db_press": _ex("ضغط صدر علوي بالدمبل", "Incline Dumbbell Press", "chest"),
+    "chest_press_machine": _ex("ضغط صدر بالجهاز", "Machine Chest Press", "chest", ("chest",), ("triceps", "shoulders")),
+    "incline_machine_press": _ex(
+        "ضغط صدر علوي بالجهاز", "Incline Machine Press", "chest", ("chest", "shoulders"), ("triceps",)
+    ),
+    "smith_incline_press": _ex(
+        "ضغط صدر علوي بالسميث", "Smith Machine Incline Press", "chest", ("chest", "shoulders"), ("triceps",)
+    ),
+    "db_fly": _ex("تفتيح صدر بالدمبل", "Dumbbell Fly", "chest", ("chest",), ("shoulders",)),
+    "incline_db_fly": _ex("تفتيح صدر علوي بالدمبل", "Incline Dumbbell Fly", "chest", ("chest",), ("shoulders",)),
+    "pec_deck": _ex("فراشة صدر بالجهاز", "Pec Deck (Machine Fly)", "chest", ("chest",)),
+    "cable_fly": _ex("تفتيح صدر بالكيبل", "Cable Fly", "chest"),
+    "low_cable_fly": _ex("تفتيح كيبل من تحت لفوق", "Low-to-High Cable Fly", "chest", ("chest",), ("shoulders",)),
+    "chest_dip": _ex("متوازي للصدر", "Chest Dip", "chest", ("chest", "triceps"), ("shoulders",)),
+    "push_up": _ex("ضغط", "Push-up", "chest"),
+    "db_pullover": _ex("بول أوفر بالدمبل", "Dumbbell Pullover", "chest", ("chest", "lats"), ("triceps",)),
     # back
-    "deadlift": {"ar": "رفعة ميتة", "en": "Deadlift", "muscle": "back"},
-    "barbell_row": {"ar": "تجديف بالبار", "en": "Barbell Row", "muscle": "back"},
-    "lat_pulldown": {"ar": "سحب أمامي", "en": "Lat Pulldown", "muscle": "back"},
-    "pull_up": {"ar": "عقلة", "en": "Pull-up", "muscle": "back"},
-    "seated_cable_row": {"ar": "تجديف جالس بالكيبل", "en": "Seated Cable Row", "muscle": "back"},
+    "deadlift": _ex("رفعة ميتة", "Deadlift", "back"),
+    "rack_pull": _ex(
+        "رفعة ميتة جزئية (راك بول)", "Rack Pull", "back", ("lower_back", "traps", "glutes"), ("hamstrings", "forearms")
+    ),
+    "barbell_row": _ex("تجديف بالبار", "Barbell Row", "back"),
+    "t_bar_row": _ex("تجديف تي بار", "T-Bar Row", "back", ("lats", "traps"), ("rear_delts", "biceps")),
+    "one_arm_db_row": _ex(
+        "تجديف دمبل بيد واحدة", "One-Arm Dumbbell Row", "back", ("lats", "traps"), ("rear_delts", "biceps")
+    ),
+    "chest_supported_row": _ex(
+        "تجديف مسنود على الصدر", "Chest-Supported Row", "back", ("traps", "lats"), ("rear_delts", "biceps")
+    ),
+    "machine_row": _ex("تجديف بالجهاز", "Machine Row", "back", ("traps", "lats"), ("biceps",)),
+    "seated_cable_row": _ex("تجديف جالس بالكيبل", "Seated Cable Row", "back"),
+    "lat_pulldown": _ex("سحب أمامي", "Lat Pulldown", "back"),
+    "close_grip_pulldown": _ex("سحب أمامي قبضة ضيقة", "Close-Grip Lat Pulldown", "back", ("lats",), ("biceps",)),
+    "straight_arm_pulldown": _ex("سحب بذراع مستقيمة", "Straight-Arm Pulldown", "back", ("lats",), ("triceps",)),
+    "pull_up": _ex("عقلة", "Pull-up", "back"),
+    "chin_up": _ex("عقلة قبضة معكوسة", "Chin-up", "back", ("lats", "biceps"), ("traps",)),
+    "assisted_pull_up": _ex("عقلة بالمساعدة", "Assisted Pull-up", "back", ("lats",), ("biceps",)),
+    "back_extension": _ex(
+        "ظهر سفلي (باك إكستنشن)", "Back Extension", "back", ("lower_back",), ("glutes", "hamstrings")
+    ),
+    "barbell_shrug": _ex("ترابيس بالبار", "Barbell Shrug", "back", ("traps",), ("forearms",)),
+    "db_shrug": _ex("ترابيس بالدمبل", "Dumbbell Shrug", "back", ("traps",), ("forearms",)),
     # shoulders
-    "overhead_press": {"ar": "ضغط أكتاف بالبار", "en": "Overhead Press", "muscle": "shoulders"},
-    "lateral_raise": {"ar": "رفرفة جانبية", "en": "Lateral Raise", "muscle": "shoulders"},
-    "face_pull": {"ar": "سحب للوجه", "en": "Face Pull", "muscle": "shoulders"},
+    "overhead_press": _ex("ضغط أكتاف بالبار", "Overhead Press", "shoulders"),
+    "db_shoulder_press": _ex("ضغط أكتاف بالدمبل", "Dumbbell Shoulder Press", "shoulders", ("shoulders",), ("triceps",)),
+    "arnold_press": _ex("ضغط أرنولد", "Arnold Press", "shoulders", ("shoulders",), ("triceps",)),
+    "machine_shoulder_press": _ex(
+        "ضغط أكتاف بالجهاز", "Machine Shoulder Press", "shoulders", ("shoulders",), ("triceps",)
+    ),
+    "lateral_raise": _ex("رفرفة جانبية", "Lateral Raise", "shoulders"),
+    "cable_lateral_raise": _ex("رفرفة جانبية بالكيبل", "Cable Lateral Raise", "shoulders", ("shoulders",)),
+    "front_raise": _ex("رفرفة أمامية", "Front Raise", "shoulders", ("shoulders",)),
+    "rear_delt_fly": _ex("رفرفة خلفية بالدمبل", "Rear Delt Fly", "shoulders", ("rear_delts",), ("traps",)),
+    "reverse_pec_deck": _ex("فراشة عكسية", "Reverse Pec Deck", "shoulders", ("rear_delts",), ("traps",)),
+    "face_pull": _ex("سحب للوجه", "Face Pull", "shoulders"),
+    "upright_row": _ex("سحب عمودي", "Upright Row", "shoulders", ("shoulders", "traps"), ("biceps",)),
+    # biceps
+    "barbell_curl": _ex("بايسبس بالبار", "Barbell Curl", "biceps"),
+    "ez_bar_curl": _ex("بايسبس بالبار المتعرج", "EZ-Bar Curl", "biceps", ("biceps",), ("forearms",)),
+    "db_curl": _ex("بايسبس بالدمبل", "Dumbbell Curl", "biceps", ("biceps",), ("forearms",)),
+    "hammer_curl": _ex("بايسبس مطرقة", "Hammer Curl", "biceps"),
+    "incline_db_curl": _ex("بايسبس على بنش مائل", "Incline Dumbbell Curl", "biceps", ("biceps",)),
+    "preacher_curl": _ex("بايسبس سكوت (على الكرسي)", "Preacher Curl", "biceps", ("biceps",)),
+    "cable_curl": _ex("بايسبس بالكيبل", "Cable Curl", "biceps", ("biceps",), ("forearms",)),
+    "concentration_curl": _ex("بايسبس تركيز", "Concentration Curl", "biceps", ("biceps",)),
+    # triceps
+    "triceps_pushdown": _ex("ترايسبس بالكيبل", "Triceps Pushdown", "triceps"),
+    "rope_pushdown": _ex("ترايسبس بالحبل", "Rope Pushdown", "triceps", ("triceps",)),
+    "overhead_triceps": _ex("ترايسبس خلف الرأس", "Overhead Triceps Extension", "triceps"),
+    "cable_overhead_ext": _ex("ترايسبس خلف الرأس بالكيبل", "Overhead Cable Extension", "triceps", ("triceps",)),
+    "skull_crusher": _ex("ترايسبس فرنسي (سكل كراشر)", "Skull Crusher", "triceps", ("triceps",)),
+    "close_grip_bench": _ex(
+        "ضغط صدر بقبضة ضيقة", "Close-Grip Bench Press", "triceps", ("triceps", "chest"), ("shoulders",)
+    ),
+    "triceps_dip": _ex("متوازي للترايسبس", "Triceps Dip", "triceps", ("triceps",), ("chest", "shoulders")),
+    "db_kickback": _ex("ترايسبس كيك باك", "Dumbbell Kickback", "triceps", ("triceps",)),
+    # forearms
+    "wrist_curl": _ex("ساعد (ثني الرسغ)", "Wrist Curl", "forearms", ("forearms",)),
+    "reverse_curl": _ex("بايسبس قبضة معكوسة", "Reverse Curl", "forearms", ("forearms", "biceps")),
+    "farmers_walk": _ex("مشية المزارع", "Farmer's Walk", "forearms", ("forearms", "traps"), ("abs", "glutes")),
     # legs
-    "squat": {"ar": "سكوات", "en": "Back Squat", "muscle": "legs"},
-    "romanian_deadlift": {"ar": "رفعة رومانية", "en": "Romanian Deadlift", "muscle": "legs"},
-    "leg_press": {"ar": "دفع أرجل", "en": "Leg Press", "muscle": "legs"},
-    "leg_curl": {"ar": "ثني أرجل", "en": "Leg Curl", "muscle": "legs"},
-    "leg_extension": {"ar": "مد أرجل", "en": "Leg Extension", "muscle": "legs"},
-    "walking_lunge": {"ar": "طعنات مشي", "en": "Walking Lunge", "muscle": "legs"},
-    "calf_raise": {"ar": "سمانة", "en": "Calf Raise", "muscle": "legs"},
-    # arms
-    "barbell_curl": {"ar": "بايسبس بالبار", "en": "Barbell Curl", "muscle": "arms"},
-    "hammer_curl": {"ar": "بايسبس مطرقة", "en": "Hammer Curl", "muscle": "arms"},
-    "triceps_pushdown": {"ar": "ترايسبس بالكيبل", "en": "Triceps Pushdown", "muscle": "arms"},
-    "overhead_triceps": {"ar": "ترايسبس خلف الرأس", "en": "Overhead Triceps Extension", "muscle": "arms"},
+    "squat": _ex("سكوات", "Back Squat", "legs"),
+    "front_squat": _ex("سكوات أمامي", "Front Squat", "legs", ("quads",), ("glutes", "abs")),
+    "smith_squat": _ex("سكوات بالسميث", "Smith Machine Squat", "legs", ("quads", "glutes"), ("hamstrings",)),
+    "hack_squat": _ex("هاك سكوات", "Hack Squat", "legs", ("quads",), ("glutes",)),
+    "goblet_squat": _ex("سكوات كأس (جوبلت)", "Goblet Squat", "legs", ("quads", "glutes"), ("abs",)),
+    "bulgarian_split_squat": _ex("سكوات بلغاري", "Bulgarian Split Squat", "legs", ("quads", "glutes"), ("hamstrings",)),
+    "leg_press": _ex("دفع أرجل", "Leg Press", "legs"),
+    "walking_lunge": _ex("طعنات مشي", "Walking Lunge", "legs"),
+    "step_up": _ex("صعود على بوكس", "Step-up", "legs", ("quads", "glutes")),
+    "leg_extension": _ex("مد أرجل", "Leg Extension", "legs"),
+    "romanian_deadlift": _ex("رفعة رومانية", "Romanian Deadlift", "legs"),
+    "sumo_deadlift": _ex(
+        "رفعة ميتة سومو", "Sumo Deadlift", "legs", ("glutes", "quads", "hamstrings"), ("lower_back", "traps")
+    ),
+    "good_morning": _ex("جود مورنينج", "Good Morning", "legs", ("hamstrings", "lower_back"), ("glutes",)),
+    "leg_curl": _ex("ثني أرجل", "Leg Curl", "legs"),
+    "seated_leg_curl": _ex("ثني أرجل جالس", "Seated Leg Curl", "legs", ("hamstrings",)),
+    "hip_thrust": _ex("دفع الحوض بالبار (هيب ثرست)", "Barbell Hip Thrust", "legs", ("glutes",), ("hamstrings",)),
+    "glute_bridge": _ex("جسر الأرداف", "Glute Bridge", "legs", ("glutes",), ("hamstrings",)),
+    "cable_kickback": _ex("ركلة خلفية بالكيبل", "Cable Glute Kickback", "legs", ("glutes",)),
+    "hip_abduction": _ex("فتح الأرجل بالجهاز", "Hip Abduction Machine", "legs", ("glutes",)),
+    "hip_adduction": _ex("ضم الأرجل بالجهاز", "Hip Adduction Machine", "legs", ("quads",)),
+    "calf_raise": _ex("سمانة", "Calf Raise", "legs"),
+    "seated_calf_raise": _ex("سمانة جالس", "Seated Calf Raise", "legs", ("calves",)),
     # core
-    "plank": {"ar": "بلانك", "en": "Plank", "muscle": "core"},
-    "hanging_leg_raise": {"ar": "رفع أرجل معلّق", "en": "Hanging Leg Raise", "muscle": "core"},
+    "plank": _ex("بلانك", "Plank", "core"),
+    "side_plank": _ex("بلانك جانبي", "Side Plank", "core", ("abs",)),
+    "hanging_leg_raise": _ex("رفع أرجل معلّق", "Hanging Leg Raise", "core"),
+    "lying_leg_raise": _ex("رفع أرجل على الأرض", "Lying Leg Raise", "core", ("abs",)),
+    "crunch": _ex("كرنش", "Crunch", "core", ("abs",)),
+    "cable_crunch": _ex("كرنش بالكيبل", "Cable Crunch", "core", ("abs",)),
+    "ab_wheel": _ex("عجلة البطن", "Ab Wheel Rollout", "core", ("abs",), ("lats", "shoulders")),
+    "russian_twist": _ex("لف روسي", "Russian Twist", "core", ("abs",)),
+    "mountain_climber": _ex("متسلق الجبل", "Mountain Climbers", "core", ("abs",), ("shoulders", "quads")),
+    # cardio
+    "treadmill_run": _ex("جري على السير", "Treadmill Run", "cardio", ("quads", "calves"), ("hamstrings", "glutes")),
+    "incline_walk": _ex(
+        "مشي مائل على السير", "Incline Treadmill Walk", "cardio", ("glutes", "calves"), ("hamstrings",)
+    ),
+    "stationary_bike": _ex("دراجة ثابتة", "Stationary Bike", "cardio", ("quads",), ("calves", "hamstrings")),
+    "elliptical": _ex("جهاز الإليبتيكال", "Elliptical", "cardio", ("quads", "glutes"), ("calves",)),
+    "rowing_machine": _ex("جهاز التجديف", "Rowing Machine", "cardio", ("lats", "quads"), ("biceps", "hamstrings")),
+    "stair_climber": _ex("جهاز الدرج", "Stair Climber", "cardio", ("glutes", "quads"), ("calves",)),
+    "jump_rope": _ex("نط الحبل", "Jump Rope", "cardio", ("calves",), ("shoulders",)),
+    "burpee": _ex("بيربي", "Burpees", "cardio", ("quads", "chest"), ("shoulders", "abs")),
 }
 
 DAY_TYPES: dict[str, dict[str, str]] = {
@@ -50,7 +162,8 @@ DAY_TYPES: dict[str, dict[str, str]] = {
     "custom": {"ar": "تمرين", "en": "Workout"},
 }
 
-MUSCLES = ["chest", "back", "shoulders", "legs", "arms", "core", "cardio", "other"]
+# "arms" is kept so custom exercises saved before biceps/triceps were split stay valid.
+MUSCLES = ["chest", "back", "shoulders", "biceps", "triceps", "forearms", "legs", "core", "cardio", "arms", "other"]
 CUSTOM_PREFIX = "custom_"
 
 # day type -> list of (exercise_key, sets, reps)
