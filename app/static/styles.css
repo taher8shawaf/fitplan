@@ -142,6 +142,11 @@ select option, select optgroup { background: var(--surface); color: var(--text);
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .field { margin-bottom: 16px; }
+.pw-wrap { position: relative; }
+.pw-wrap .input { padding-inline-end: 72px; }
+.pw-toggle { position: absolute; inset-block: 0; inset-inline-end: 4px; margin-block: auto; height: 36px; padding: 0 12px; background: none; border: 0; border-radius: var(--r-sm); color: var(--muted); font: inherit; font-size: var(--t-sm); font-weight: 600; cursor: pointer; }
+.pw-toggle:hover, .pw-toggle:focus-visible { color: var(--text); background: var(--tint); }
+.pw-warn { color: var(--danger); font-size: var(--t-xs); margin: 6px 0 0; line-height: 1.6; }
 .row { display: flex; gap: 10px; align-items: center; }
 .row > * { flex: 1; }
 .link { color: var(--text); text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; cursor: pointer; padding: 4px; font-weight: 600; }

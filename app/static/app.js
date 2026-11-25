@@ -5,7 +5,8 @@ const I18N = {
   ar: {
     tagline: "نظّم تمارينك وأكلك في مكان واحد",
     login: "تسجيل الدخول", register: "إنشاء حساب", name: "الاسم", email: "البريد الإلكتروني",
-    password: "كلمة المرور", noAccount: "ما عندك حساب؟", haveAccount: "عندك حساب؟",
+    password: "كلمة المرور", showPassword: "إظهار", hidePassword: "إخفاء",
+    arabicPassword: "كلمة المرور فيها حروف عربية. إذا سجلت حسابك بكيبورد إنجليزي، غيّر لغة الكيبورد.", noAccount: "ما عندك حساب؟", haveAccount: "عندك حساب؟",
     today: "اليوم", plan: "الجدول", food: "الأكل", profile: "ملفي", social: "المجتمع",
     hello: "هلا", todaysWorkout: "تمرين اليوم", restDay: "يوم راحة", restText: "العضلات تكبر وقت الراحة. اشرب ماي ونام زين.",
     noPlan: "ما عندك جدول تمارين للحين", createPlan: "سوّ جدولك", done: "تم اليوم ✓",
@@ -95,7 +96,8 @@ const I18N = {
   en: {
     tagline: "Your workouts and meals, organized in one place",
     login: "Log in", register: "Sign up", name: "Name", email: "Email",
-    password: "Password", noAccount: "No account?", haveAccount: "Have an account?",
+    password: "Password", showPassword: "Show", hidePassword: "Hide",
+    arabicPassword: "Your password has Arabic letters. If you signed up on an English keyboard, switch the keyboard language.", noAccount: "No account?", haveAccount: "Have an account?",
     today: "Today", plan: "Plan", food: "Food", profile: "Profile", social: "Community",
     hello: "Hi", todaysWorkout: "Today's workout", restDay: "Rest day", restText: "Muscles grow while you rest. Hydrate and sleep well.",
     noPlan: "You don't have a workout plan yet", createPlan: "Create your plan", done: "Done today ✓",
@@ -324,6 +326,8 @@ async function render() {
 }
 
 // ---------------------------------------------------------------- auth
+const ARABIC_LETTERS = /[\u0600-\u06FF]/;
+
 function renderAuth() {
   const reg = state.authMode === "register";
   $app.innerHTML = `<div class="shell"><div style="display:flex;justify-content:flex-end">${topActions()}</div>
@@ -333,16 +337,24 @@ function renderAuth() {
       <form class="card" id="auth-form">
         ${reg ? `<div class="field"><label>${t("name")}</label><input class="input" name="name" required maxlength="80" autocomplete="name"></div>` : ""}
         <div class="field"><label>${t("email")}</label><input class="input" name="email" type="email" required autocomplete="email" dir="ltr"></div>
-        <div class="field"><label>${t("password")}</label><input class="input" name="password" type="password" required minlength="${reg ? 8 : 1}" autocomplete="${reg ? "new-password" : "current-password"}" dir="ltr"></div>
+        <div class="field"><label for="auth-pw">${t("password")}</label>
+          <div class="pw-wrap" dir="ltr"><input class="input" id="auth-pw" name="password" type="password" required minlength="${reg ? 8 : 1}" autocomplete="${reg ? "new-password" : "current-password"}" dir="ltr">
+            <button type="button" class="pw-toggle" data-action="toggle-pw" aria-pressed="false">${t("showPassword")}</button></div>
+          <p class="pw-warn" id="pw-warn" hidden>${t("arabicPassword")}</p></div>
         <div class="error" id="auth-error"></div>
         <button class="btn block" type="submit">${reg ? t("register") : t("login")}</button>
       </form>
       <div class="switch">${reg ? t("haveAccount") : t("noAccount")}
         <button class="link" data-action="auth-switch">${reg ? t("login") : t("register")}</button></div>
     </div></div>`;
+  // A password typed on the Arabic keyboard layout looks the same as dots, so warn about it.
+  document.getElementById("auth-pw").addEventListener("input", (ev) => {
+    document.getElementById("pw-warn").hidden = !ARABIC_LETTERS.test(ev.target.value);
+  });
   document.getElementById("auth-form").onsubmit = async (ev) => {
     ev.preventDefault();
     const f = Object.fromEntries(new FormData(ev.target));
+    f.email = f.email.trim();
     try {
       const res = await api(`/api/auth/${reg ? "register" : "login"}`, { method: "POST", body: f });
       state.token = res.access_token; store.set("token", res.access_token);
@@ -1468,6 +1480,13 @@ document.addEventListener("click", async (ev) => {
     else if (a === "close-sheet") closeSheet();
 
     else if (a === "rest-stop") stopRest();
+    else if (a === "toggle-pw") {
+      const input = document.getElementById("auth-pw");
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      el.setAttribute("aria-pressed", String(show));
+      el.textContent = show ? t("hidePassword") : t("showPassword");
+    }
     else if (a === "auth-switch") { state.authMode = state.authMode === "login" ? "register" : "login"; render(); }
     else if (a === "logout") logout();
     else if (a === "pick-day") {
