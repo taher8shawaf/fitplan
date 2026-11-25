@@ -5,7 +5,15 @@ from sqlmodel import col, or_, select
 
 from app.deps import CurrentUser, SessionDep
 from app.models import Food, MealEntry, Profile
-from app.schemas import DayNutritionOut, FoodIn, FoodOut, Macros, MealEntryOut, MealIn
+from app.schemas import (
+    BatchMealIn,
+    DayNutritionOut,
+    FoodIn,
+    FoodOut,
+    Macros,
+    MealEntryOut,
+    MealIn,
+)
 from app.services.nutrition import calculate_targets, macros_for
 
 router = APIRouter(tags=["nutrition"])
@@ -25,11 +33,34 @@ def visible_food(session, user, food_id: int) -> Food:
 # ---------- foods ----------
 @router.get("/api/foods", response_model=list[FoodOut])
 def search_foods(user: CurrentUser, session: SessionDep, q: str = Query("", max_length=50)):
-    stmt = select(Food).where(or_(Food.owner_id == None, Food.owner_id == user.id))  # noqa: E711
+    stmt = select(Food).where(
+        or_(Food.owner_id == None, Food.owner_id == user.id),  # noqa: E711
+        Food.kind != "quick",
+    )
     if q.strip():
         pattern = f"%{q.strip()}%"
         stmt = stmt.where(or_(col(Food.name_ar).ilike(pattern), col(Food.name_en).ilike(pattern)))
     return [food_out(f) for f in session.exec(stmt.order_by(col(Food.id)).limit(50))]
+
+
+@router.get("/api/foods/recent", response_model=list[FoodOut])
+def recent_foods(user: CurrentUser, session: SessionDep, limit: int = Query(8, ge=1, le=20)):
+    """The user's most recently logged distinct foods, for one-tap re-adding."""
+    rows = session.exec(
+        select(MealEntry.food_id)
+        .join(Food, col(Food.id) == col(MealEntry.food_id))
+        .where(MealEntry.user_id == user.id, Food.kind != "quick")
+        .order_by(col(MealEntry.id).desc())
+        .limit(200)
+    )
+    ids: list[int] = []
+    for food_id in rows:
+        if food_id not in ids:
+            ids.append(food_id)
+        if len(ids) == limit:
+            break
+    foods = {f.id: f for f in session.exec(select(Food).where(col(Food.id).in_(ids)))} if ids else {}
+    return [food_out(foods[i]) for i in ids if i in foods]
 
 
 @router.post("/api/foods", response_model=FoodOut, status_code=status.HTTP_201_CREATED)
@@ -65,6 +96,26 @@ def add_meal(data: MealIn, user: CurrentUser, session: SessionDep):
     session.commit()
     session.refresh(entry)
     return entry_out(entry, food)
+
+
+@router.post("/api/meals/batch", response_model=list[MealEntryOut], status_code=status.HTTP_201_CREATED)
+def add_meals(data: BatchMealIn, user: CurrentUser, session: SessionDep):
+    """Log several foods at once."""
+    created: list[tuple[MealEntry, Food]] = []
+    for item in data.items:
+        if item.food_id is not None:
+            food = visible_food(session, user, item.food_id)
+        else:
+            food = Food(**item.food.model_dump(), owner_id=user.id)
+            session.add(food)
+            session.flush()
+        entry = MealEntry(user_id=user.id, food_id=food.id, day=data.day, meal_type=data.meal_type, grams=item.grams)
+        session.add(entry)
+        created.append((entry, food))
+    session.commit()
+    for entry, _ in created:
+        session.refresh(entry)
+    return [entry_out(e, f) for e, f in created]
 
 
 @router.get("/api/meals", response_model=DayNutritionOut)

@@ -47,7 +47,11 @@ DAY_TYPES: dict[str, dict[str, str]] = {
     "push": {"ar": "دفع", "en": "Push"},
     "pull": {"ar": "سحب", "en": "Pull"},
     "legs": {"ar": "أرجل", "en": "Legs"},
+    "custom": {"ar": "تمرين", "en": "Workout"},
 }
+
+MUSCLES = ["chest", "back", "shoulders", "legs", "arms", "core", "cardio", "other"]
+CUSTOM_PREFIX = "custom_"
 
 # day type -> list of (exercise_key, sets, reps)
 TEMPLATES: dict[str, list[tuple[str, int, str]]] = {
@@ -125,6 +129,7 @@ SPLIT_NAMES: dict[str, dict[str, str]] = {
     "upper_lower": {"ar": "علوي / سفلي", "en": "Upper / Lower"},
     "hybrid": {"ar": "علوي / سفلي + دفع / سحب / أرجل", "en": "Upper / Lower + PPL"},
     "ppl": {"ar": "دفع / سحب / أرجل", "en": "Push / Pull / Legs"},
+    "custom": {"ar": "جدولي الخاص", "en": "My custom plan"},
 }
 
 WEIGHT_STEP_KG = 2.5

@@ -94,3 +94,58 @@ def test_cannot_delete_someone_elses_meal(client, auth, other_auth):
     ).json()
     assert client.delete(f"/api/meals/{entry['id']}", headers=other_auth).status_code == 404
     assert client.delete(f"/api/meals/{entry['id']}", headers=auth).status_code == 204
+
+
+def test_recent_foods(client, auth):
+    foods = client.get("/api/foods", headers=auth).json()
+    for f in (foods[0], foods[1], foods[0]):
+        client.post(
+            "/api/meals",
+            json={"day": "2026-01-10", "meal_type": "lunch", "food_id": f["id"], "grams": 100},
+            headers=auth,
+        )
+    recent = [f["id"] for f in client.get("/api/foods/recent", headers=auth).json()]
+    assert recent == [foods[0]["id"], foods[1]["id"]]  # newest first, no duplicates
+
+
+def test_targets_explain_the_goal():
+    p = Profile(
+        user_id=1,
+        sex=Sex.male,
+        age=25,
+        height_cm=178,
+        weight_kg=80,
+        activity_level=ActivityLevel.moderate,
+        goal=Goal.cut,
+    )
+    t = calculate_targets(p)
+    assert t.calorie_change == t.calories - t.tdee < 0
+    assert -1.0 < t.weekly_change_kg < -0.3  # a moderate cut, not a crash diet
+    assert t.goal_calories["cut"] < t.goal_calories["maintain"] < t.goal_calories["bulk"]
+    assert t.goal_calories["maintain"] == t.tdee
+    assert t.protein_min_g == 128 and t.protein_max_g == 176  # 1.6 and 2.2 g/kg
+    assert t.protein_min_g <= t.protein_g <= t.protein_max_g
+    assert t.fat_min_g <= t.fat_g <= t.fat_max_g
+
+
+def test_protein_uses_reference_weight_for_high_bmi():
+    p = Profile(
+        user_id=1, sex=Sex.male, age=30, height_cm=175, weight_kg=140, activity_level=ActivityLevel.light, goal=Goal.cut
+    )
+    t = calculate_targets(p)
+    reference = 30 * 1.75**2  # ~91.9 kg, the weight at BMI 30
+    assert t.protein_g == round(reference * 2.0)
+
+
+def test_floor_is_reported():
+    p = Profile(
+        user_id=1,
+        sex=Sex.female,
+        age=70,
+        height_cm=145,
+        weight_kg=40,
+        activity_level=ActivityLevel.sedentary,
+        goal=Goal.cut,
+    )
+    t = calculate_targets(p)
+    assert t.floor_applied is True and t.calories == 1200

@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session
 
 from app.database import engine, init_db
-from app.routers import auth, meals, profile, workouts
+from app.routers import auth, meals, profile, social, tracking, workouts
 from app.seed import seed_foods
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -32,6 +32,8 @@ app.include_router(auth.router)
 app.include_router(profile.router)
 app.include_router(workouts.router)
 app.include_router(meals.router)
+app.include_router(social.router)
+app.include_router(tracking.router)
 
 
 @app.get("/health", tags=["meta"])

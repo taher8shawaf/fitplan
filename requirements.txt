@@ -3,3 +3,4 @@ sqlmodel>=0.0.22
 bcrypt>=4.2
 pyjwt>=2.9
 email-validator>=2.2
+psycopg[binary]>=3.2  # Postgres driver (Supabase)

@@ -24,3 +24,11 @@ def test_login(client, auth):
 def test_protected_routes_need_token(client):
     assert client.get("/api/profile").status_code == 401
     assert client.get("/api/auth/me", headers={"Authorization": "Bearer nonsense"}).status_code == 401
+
+
+def test_transaction_pooler_detection():
+    from app.database import uses_transaction_pooler
+
+    assert uses_transaction_pooler("postgresql+psycopg://u:p@aws-0-eu-central-1.pooler.supabase.com:6543/postgres")
+    assert not uses_transaction_pooler("postgresql+psycopg://u:p@aws-0-eu-central-1.pooler.supabase.com:5432/postgres")
+    assert not uses_transaction_pooler("sqlite:///./fitplan.db")
