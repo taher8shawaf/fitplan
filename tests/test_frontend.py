@@ -77,3 +77,14 @@ def test_every_static_class_has_a_style():
         used |= set(attr.split())
     missing = {c for c in used - NO_STYLE_NEEDED if not re.search(rf"\.{re.escape(c)}\b", CSS)}
     assert missing == set(), f"classes with no CSS: {sorted(missing)}"
+
+
+def test_index_links_versioned_assets():
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    res = TestClient(app).get("/")
+    assert res.status_code == 200
+    assert res.headers["cache-control"] == "no-cache"
+    assert "/static/app.js?v=" in res.text and "/static/styles.css?v=" in res.text

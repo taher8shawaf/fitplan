@@ -1,8 +1,9 @@
+import hashlib
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session
 
@@ -46,6 +47,23 @@ def health():
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
+def _versioned_index() -> str:
+    """index.html with ?v=<content hash> on the CSS and JS links.
+
+    Browsers (phones especially) can keep old copies of these files; a new hash on every
+    change makes them fetch the new version, so everyone sees an update right away.
+    """
+    html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    for name in ("styles.css", "app.js"):
+        digest = hashlib.sha256((STATIC_DIR / name).read_bytes()).hexdigest()[:10]
+        html = html.replace(f"/static/{name}", f"/static/{name}?v={digest}")
+    return html
+
+
+INDEX_HTML = _versioned_index()
+
+
 @app.get("/", include_in_schema=False)
 def index():
-    return FileResponse(STATIC_DIR / "index.html")
+    # no-cache: the page itself is always re-checked, so it always points at the newest files
+    return HTMLResponse(INDEX_HTML, headers={"Cache-Control": "no-cache"})
