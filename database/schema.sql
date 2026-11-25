@@ -224,8 +224,18 @@ CREATE TABLE workoutlike (
 );
 CREATE INDEX ix_workoutlike_workout_log_id ON workoutlike (workout_log_id);
 
+CREATE TABLE mealplanprefs (
+	user_id INTEGER NOT NULL, 
+	budget INTEGER NOT NULL, 
+	liked VARCHAR NOT NULL, 
+	disliked VARCHAR NOT NULL, 
+	PRIMARY KEY (user_id), 
+	FOREIGN KEY(user_id) REFERENCES "user" (id)
+);
+
 -- Supabase: the app connects as the table owner. Block the public API roles completely
 -- (these tables hold password hashes): RLS on with no policies, and no grants.
+
 ALTER TABLE "user" ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE "user" FROM anon, authenticated;
 ALTER TABLE "customexercise" ENABLE ROW LEVEL SECURITY;
@@ -262,3 +272,5 @@ ALTER TABLE "setlog" ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE "setlog" FROM anon, authenticated;
 ALTER TABLE "workoutlike" ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE "workoutlike" FROM anon, authenticated;
+ALTER TABLE "mealplanprefs" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE "mealplanprefs" FROM anon, authenticated;

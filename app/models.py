@@ -191,3 +191,12 @@ class WaterLog(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", primary_key=True)
     day: date = Field(primary_key=True)
     ml: int = 0
+
+
+class MealPlanPrefs(SQLModel, table=True):
+    """Meal planner settings: budget (1 cheap, 2 medium, 3 any) and liked / disliked food ids."""
+
+    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    budget: int = 2
+    liked: str = ""  # comma-separated food ids
+    disliked: str = ""

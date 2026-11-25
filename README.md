@@ -18,10 +18,12 @@ A bilingual (Arabic / English) web app that builds your gym schedule, tracks you
 - **Clear personal targets.** Tells you exactly how many calories to eat for your goal, how far that is from your daily burn, and the expected weekly weight change. Compare cut / maintain / bulk side by side and switch with one tap.
 - **Protein range.** Minimum (1.6 g/kg), best for your goal, and upper limit (2.2 g/kg), plus per-meal amounts. Uses the Mifflin-St Jeor equation, safe calorie floors, and a BMI-30 reference weight for protein at high body weights.
 - **Ready-made or fully custom plans.** Pick your training days (2 to 6) and get a split that fits (Full Body, Upper/Lower, Upper/Lower + PPL, Push/Pull/Legs), or build your own from scratch.
-- **Full plan editor.** Add, remove, rename and move training days; add exercises from a 25-exercise library or your own custom exercises; edit sets and reps inline; reorder exercises.
+- **Full plan editor.** Add, remove, rename and move training days; add exercises from a 102-exercise library (chest, back, shoulders, biceps, triceps, forearms, legs, core, cardio) or your own custom exercises; edit sets and reps inline; reorder exercises.
 - **Today screen.** Shows today's workout or a rest day, with your sets from last time.
 - **Progressive overload suggestions.** Uses double progression: if you hit the top of the rep range on every working set, it suggests adding 2.5 kg next time.
 - **Progress chart.** Estimated 1RM over time per exercise (Epley formula).
+- **Progress dashboard.** One page for the big picture: workout consistency (done vs planned per week), weekly average body weight and its trend, the last 7 days of calories and protein against your targets, and how much your main lifts have improved.
+- **Smart meal planner.** Builds a full day (breakfast, lunch, dinner, snack) sized to your calories and protein, shows protein per meal, swaps any food for an equivalent (same protein, or same calories), and respects a budget level plus foods you like or want to avoid. Log the whole plan in one tap.
 - **Meal tracking.** A built-in food database with common Arabic and Gulf foods (kabsa, foul, labneh, dates, hummus…), meal logging by day, remaining calories and macros, and private custom foods.
 - **Exercise guides.** Every exercise has step-by-step instructions, a safety tip, a front/back muscle map of the muscles it works, and a link to video demos.
 - **Community.** Every user gets an @username. Find friends by name or username (emails are never exposed), follow them, see their workouts in a feed with sets, total volume and best sets, and give them a 💪. A private mode hides your workouts from everyone.
@@ -129,6 +131,11 @@ tests/
 | GET / POST | `/api/water` | Daily water intake and goal |
 | GET / PUT / DELETE | `/api/weights` | Body weight (one entry per day) |
 | GET | `/api/adaptive` | Measured daily burn (or progress toward enough data) |
+| GET | `/api/progress?today=` | Dashboard: weekly weight, lifts, adherence, last 7 days of nutrition |
+| POST | `/api/meal-plan` | Generate a day of meals for your targets |
+| POST | `/api/meal-plan/alternatives` | Swaps for one food in the plan |
+| GET / PUT | `/api/meal-plan/prefs` | Budget and liked / avoided foods |
+| GET | `/api/meal-plan/foods` | Foods the planner can use |
 | POST / DELETE | `/api/adaptive/apply` | Use the measured burn for targets / go back to the formula |
 | PATCH | `/api/me/social` | Change username / private mode |
 | GET | `/api/users/search?q=` | Find people by name or @username |
@@ -145,6 +152,7 @@ tests/
 - **Food values are stored per 100 g.** Any amount can then be calculated the same way.
 - **SQLite behaves like Postgres in tests.** Foreign keys are enforced in SQLite too, and the suite also runs against real Postgres; this caught delete-order bugs that plain SQLite would have hidden.
 - **Adaptive calories are guarded.** The estimate needs at least 8 weigh-ins over 14+ days and 10 fully-logged days; days under 800 kcal are treated as incomplete and ignored, and results are clamped to ±30% of the formula so one bad week can't produce extreme targets.
+- **The meal planner is rule-based, not a black box.** Each built-in food has a role (protein, carb, vegetable, fat, fruit), the meals it suits, a price tier and natural portion steps (one egg, half a pita). Protein is sized first, carbs fill the remaining calories, then portions are nudged until the day is within a few percent of the targets. Prices vary by country, so budget is only cheap / medium / any.
 - **Privacy first in the social features.** Search never matches emails, a private account's workouts return `404` to others (even for likes), and the feed uses keyset paging (`before_id`) so new posts don't shift pages.
 
 ### Roadmap
@@ -170,10 +178,12 @@ tests/
 - **البروتين كمدى:** أقل شي، والأفضل لهدفك، والحد الأعلى، وكم تاكل في كل وجبة.
 - **طريقة الحساب:** يحسب الحرق الأساسي والحرق اليومي، والسعرات والبروتين والكارب والدهون، حسب بياناتك وهدفك (تنشيف أو ثبات أو تضخيم). الحساب بمعادلة Mifflin-St Jeor، مع حد أدنى آمن للسعرات.
 - **جدول جاهز أو من الصفر:** تختار أيام تمرينك ويطلع لك جدول متكامل، أو تبني جدولك بنفسك.
-- **تحكم كامل بالجدول:** تضيف أيام وتحذفها وتسميها وتغيّر يومها، وتضيف تمارين من المكتبة أو تمارين خاصة فيك، وتعدّل المجموعات والتكرارات، وترتب التمارين.
+- **تحكم كامل بالجدول:** تضيف أيام وتحذفها وتسميها وتغيّر يومها، وتضيف تمارين من مكتبة فيها 102 تمرين أو تمارين خاصة فيك، وتعدّل المجموعات والتكرارات، وترتب التمارين.
 - **شاشة اليوم:** توريك تمرين اليوم أو إنه يوم راحة، مع أرقامك من آخر مرة.
 - **اقتراح زيادة الوزن:** إذا وصلت لأعلى عدد تكرارات في كل المجموعات، يقترح عليك تزيد 2.5 كغ في التمرين الجاي.
 - **رسم بياني للتقدم:** يوضح تطور أقصى وزن متوقع (1RM) لكل تمرين.
+- **لوحة التقدّم:** صفحة وحدة فيها نسبة التزامك بالتمارين، ووزنك الأسبوعي واتجاهه، وسعراتك وبروتينك آخر 7 أيام مقارنة بهدفك، وكم تطورت أوزانك.
+- **مخطط الوجبات الذكي:** يبني لك يوم أكل كامل على قد سعراتك وبروتينك، ويوريك البروتين بكل وجبة، وتقدر تبدّل أي أكلة ببديل يعطي نفس البروتين أو السعرات، وياخذ بعين الاعتبار ميزانيتك والأكل اللي تحبه أو ما تبيه.
 - **تنظيم الأكل:** قاعدة أطعمة فيها أكلات عربية وخليجية (كبسة، فول، لبنة، تمر، حمص…)، وتسجيل الوجبات لكل يوم، ويوريك كم باقي لك. وتقدر تضيف أكلاتك الخاصة.
 - **شرح التمارين:** خطوات الأداء، ونصيحة، ورسم يوضح العضلات اللي يشغّلها كل تمرين، ورابط فيديو.
 - **وجبات محفوظة ووصفات:** تحفظ وجبة وتضيفها بضغطة، وتسوي وصفة من مكوناتها ويحسب لك سعرات الحصة.

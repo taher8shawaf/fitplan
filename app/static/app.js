@@ -93,6 +93,21 @@ const I18N = {
     days: ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
     dayOrder: [5, 6, 0, 1, 2, 3, 4],
     daysShort: ["إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت", "أحد"],
+    progressTab: "تقدّمي", infoTab: "معلوماتي", progressTitle: "تقدّمك",
+    adherenceTitle: "الالتزام بالتمارين", adherenceThisWeek: "هالأسبوع: {done} من {planned}", adherenceNoPlan: "سوّ جدول تمارين عشان نحسب التزامك.",
+    adherenceWait: "بعد أول أسبوع كامل بتطلع لك النسبة.", last4Weeks: "آخر 4 أسابيع", workoutsWord: "تمارين",
+    weightTitle: "الوزن الأسبوعي", weightNone: "سجّل وزنك (من معلوماتي) عشان يطلع لك هنا.", latestWeight: "آخر وزن",
+    changeOverWeeks: "التغيير خلال {n} أسابيع", perWeekShort: "بالأسبوع", weeklyAvgNote: "كل عمود متوسط وزنك بالأسبوع",
+    nutritionTitle: "السعرات والبروتين", last7: "آخر 7 أيام", avgCalories: "متوسط السعرات", avgProtein: "متوسط البروتين",
+    daysOnTarget: "{n} من {m} أيام على الهدف", nutritionNone: "سجّل أكلك عشان يطلع لك هنا.", targetLine: "الخط = هدفك",
+    liftsTitle: "تطور الأوزان", liftsNone: "سجّل نفس التمرين مرتين عشان يطلع تطوره.", liftsNote: "حسب أقصى وزن تقديري لعدة وحدة",
+    mpTitle: "مخطط الوجبات", mpDesc: "نبني لك يوم أكل كامل على قد سعراتك وبروتينك، من أكل تحبه وعلى قد ميزانيتك.",
+    mpMake: "اعمل لي خطة", mpAnother: "خطة ثانية", mpLogAll: "سجّل الخطة لهاليوم", mpLogged: "انضافت الخطة لأكلك",
+    mpPrefs: "التفضيلات", mpBudget: "الميزانية", budget1: "اقتصادية", budget2: "متوسطة", budget3: "مفتوحة",
+    mpBudgetNote: "تقريبية، لأن الأسعار تختلف من بلد لبلد.", mpFoodsLabel: "الأكل", mpPrefsHint: "اضغط مرة = تحبه، مرتين = ما تبيه، ثلاث = عادي.",
+    mpLike: "تحبه", mpAvoid: "ما تبيه", mpSwap: "بدّل", mpSwapTitle: "بدائل: {name}", mpSwapProtein: "بنفس البروتين تقريبًا",
+    mpSwapKcal: "بنفس السعرات تقريبًا", mpNoSwaps: "ما فيه بدائل تناسب تفضيلاتك.", mpNeedProfile: "عبّي معلوماتك بصفحة ملفي أول.",
+    mpDayTotal: "مجموع الخطة", mpRole_protein: "بروتين", mpRole_carb: "نشويات", mpRole_veg: "خضار", mpRole_fat: "دهون", mpRole_fruit: "فواكه", mpClear: "إخفاء الخطة",
     workoutSaved: "عاش! انحفظ تمرينك", yourWeek: "أسبوعك", trainingDays: "أيام تمرين", minutesShort: "دقيقة", editDay: "تعديل", doneEditing: "تم",
     workoutN: "التمرين {n}", tapDay: "اضغط على يوم عشان تروح له",
   },
@@ -187,6 +202,21 @@ const I18N = {
     days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
     dayOrder: [0, 1, 2, 3, 4, 5, 6],
     daysShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    progressTab: "Progress", infoTab: "My info", progressTitle: "Your progress",
+    adherenceTitle: "Workout consistency", adherenceThisWeek: "This week: {done} of {planned}", adherenceNoPlan: "Make a workout plan to track consistency.",
+    adherenceWait: "Your score appears after your first full week.", last4Weeks: "Last 4 weeks", workoutsWord: "workouts",
+    weightTitle: "Weekly weight", weightNone: "Log your weight (under My info) to see it here.", latestWeight: "Latest weight",
+    changeOverWeeks: "Change over {n} weeks", perWeekShort: "per week", weeklyAvgNote: "Each bar is your average weight that week",
+    nutritionTitle: "Calories and protein", last7: "Last 7 days", avgCalories: "Average calories", avgProtein: "Average protein",
+    daysOnTarget: "{n} of {m} days on target", nutritionNone: "Log your food to see it here.", targetLine: "The line is your target",
+    liftsTitle: "Strength progress", liftsNone: "Log the same exercise twice to see its progress.", liftsNote: "By estimated one-rep max",
+    mpTitle: "Meal planner", mpDesc: "A full day of meals sized to your calories and protein, from food you like and within your budget.",
+    mpMake: "Make me a plan", mpAnother: "Another plan", mpLogAll: "Log plan for this day", mpLogged: "Plan added to your meals",
+    mpPrefs: "Preferences", mpBudget: "Budget", budget1: "Low", budget2: "Medium", budget3: "Any",
+    mpBudgetNote: "Approximate: prices vary by country.", mpFoodsLabel: "Foods", mpPrefsHint: "Tap once = like, twice = avoid, three times = neutral.",
+    mpLike: "Like", mpAvoid: "Avoid", mpSwap: "Swap", mpSwapTitle: "Swaps: {name}", mpSwapProtein: "About the same protein",
+    mpSwapKcal: "About the same calories", mpNoSwaps: "No swaps fit your preferences.", mpNeedProfile: "Fill in your info on the Profile page first.",
+    mpDayTotal: "Plan total", mpRole_protein: "Protein", mpRole_carb: "Carbs", mpRole_veg: "Vegetables", mpRole_fat: "Fats", mpRole_fruit: "Fruit", mpClear: "Hide plan",
     workoutSaved: "Nice work! Workout saved", yourWeek: "Your week", trainingDays: "training days", minutesShort: "min", editDay: "Edit", doneEditing: "Done",
     workoutN: "Workout {n}", tapDay: "Tap a day to jump to it",
   },
@@ -207,6 +237,8 @@ const state = {
   tab: "today",
   authMode: "login",
   editDay: null,
+  profileTab: "progress",
+  mealPlan: (() => { try { return JSON.parse(localStorage.getItem("mealPlan")); } catch { return null; } })(),
   user: null,
   foodDay: localISO(),
   foodQuery: "",
@@ -692,6 +724,7 @@ const afterRender = {
   },
   profile() {
     const social = document.getElementById("social-form");
+    if (!social) return; // progress tab
     social.onsubmit = async (ev) => {
       ev.preventDefault();
       const fd = new FormData(social);
@@ -1138,6 +1171,7 @@ async function viewFood() {
   return `<div class="page-head"><h1>${t("food")}</h1>
       <input type="date" class="input" id="food-day" value="${state.foodDay}" style="width:auto;min-height:42px"></div>
     ${nutritionCard(n)}
+    ${mealPlanCard()}
     <div class="card"><h2>${t("addFood")}</h2>${foodTabs()}${body}</div>
     <div class="card">
       <div class="card-head"><h2>${t("yourMeals")}</h2><button class="btn small ghost" data-action="copy-day">${t("copyYesterday")}</button></div>
@@ -1171,6 +1205,107 @@ async function viewFood() {
         <input type="hidden" name="serving_g" value="100">
         <button class="btn block ghost" type="submit">${t("createFood")}</button>
       </form></details></div>`;
+}
+
+
+// ---------------------------------------------------------------- meal planner
+function saveMealPlan() {
+  try { state.mealPlan ? localStorage.setItem("mealPlan", JSON.stringify(state.mealPlan)) : localStorage.removeItem("mealPlan"); } catch { /* ignore */ }
+}
+
+function portionText(food, grams) {
+  const units = grams / food.serving_g;
+  const whole = food.serving_g && food.serving_g !== 100 && Math.abs(units - Math.round(units * 2) / 2) < 0.01;
+  return `${num(grams)} ${t("g")}${whole ? ` <span class="muted">(${num(units)} × ${esc(isAr() ? food.serving_ar : food.serving_en)})</span>` : ""}`;
+}
+
+function mealPlanCard() {
+  const mp = state.mealPlan;
+  const actions = (main) => `<div class="mp-actions">${main}
+    <button class="btn small ghost" data-action="mp-prefs">${t("mpPrefs")}</button></div>`;
+  if (!mp || mp.day !== state.foodDay) {
+    return `<div class="card mp-card"><h2>${t("mpTitle")}</h2><p class="sub">${t("mpDesc")}</p>
+      ${actions(`<button class="btn small" data-action="mp-make">${t("mpMake")}</button>`)}</div>`;
+  }
+  const meals = mp.meals.map((m, mi) => `
+    <div class="mp-meal">
+      <div class="mp-meal-head"><h3>${t(m.meal_type)}</h3>
+        ${meta(`${num(m.calories)} ${t("kcal")}`, `<span class="p">${t("protein")} ${num(m.protein)} ${t("g")}</span>`)}</div>
+      ${m.items.map((it, ii) => `<div class="mp-item">
+        <div class="mp-item-main"><div>${esc(nm(it.food))}</div>
+          <div class="note">${meta(portionText(it.food, it.grams), `${num(it.calories)} ${t("kcal")}`, `<span class="p">${num(Math.round(it.protein))} ${t("g")}</span>`)}</div></div>
+        <button class="btn small ghost" data-action="mp-swap" data-meal="${mi}" data-item="${ii}">${t("mpSwap")}</button>
+      </div>`).join("")}
+    </div>`).join("");
+  return `<div class="card mp-card">
+    <div class="card-head"><h2>${t("mpTitle")}</h2><button class="link" data-action="mp-clear">${t("mpClear")}</button></div>
+    <div class="mp-total">
+      <div><div class="sub-label">${t("mpDayTotal")}</div><div class="mid-stat">${num(mp.calories)} <small>/ ${num(mp.target_calories)} ${t("kcal")}</small></div></div>
+      <div><div class="sub-label">${t("protein")}</div><div class="mid-stat p">${num(mp.protein)} <small>/ ${num(mp.target_protein)} ${t("g")}</small></div></div>
+    </div>
+    ${meals}
+    ${actions(`<button class="btn small" data-action="mp-log">${t("mpLogAll")}</button>
+      <button class="btn small ghost" data-action="mp-make">${t("mpAnother")}</button>`)}
+  </div>`;
+}
+
+function recountMealPlan() {
+  const mp = state.mealPlan;
+  for (const m of mp.meals) {
+    m.calories = Math.round(m.items.reduce((sum, i) => sum + i.calories, 0));
+    m.protein = Math.round(m.items.reduce((sum, i) => sum + i.protein, 0));
+  }
+  mp.calories = mp.meals.reduce((sum, m) => sum + m.calories, 0);
+  mp.protein = mp.meals.reduce((sum, m) => sum + m.protein, 0);
+}
+
+async function makeMealPlan() {
+  try {
+    const plan = await api("/api/meal-plan", { method: "POST", body: { seed: Math.floor(Math.random() * 1_000_000) } });
+    state.mealPlan = { ...plan, day: state.foodDay };
+    saveMealPlan(); render();
+  } catch (e) { toast(e.status === 400 ? t("mpNeedProfile") : e.message); }
+}
+
+async function openSwaps(mi, ii) {
+  const m = state.mealPlan.meals[mi], it = m.items[ii];
+  const swaps = await api("/api/meal-plan/alternatives", { method: "POST", body: { food_id: it.food.id, grams: it.grams, meal_type: m.meal_type } });
+  state._swaps = { mi, ii, swaps };
+  openSheet(`<h2 style="margin-bottom:4px">${tf("mpSwapTitle", { name: esc(nm(it.food)) })}</h2>
+    <p class="sub">${it.role === "protein" ? t("mpSwapProtein") : t("mpSwapKcal")}: ${meta(`${num(it.calories)} ${t("kcal")}`, `<span class="p">${num(Math.round(it.protein))} ${t("g")}</span>`)}</p>
+    ${swaps.length ? swaps.map((s, i) => `<button class="mp-swap-row" data-action="mp-pick" data-i="${i}">
+        <span>${esc(nm(s.food))}<span class="note">${meta(portionText(s.food, s.grams), `${num(s.calories)} ${t("kcal")}`, `<span class="p">${num(Math.round(s.protein))} ${t("g")}</span>`)}</span></span>
+        <span class="mp-pick">${t("mpSwap")}</span></button>`).join("") : `<p class="empty">${t("mpNoSwaps")}</p>`}`);
+}
+
+async function openMealPrefs() {
+  const [prefs, foods] = await Promise.all([api("/api/meal-plan/prefs"), api("/api/meal-plan/foods")]);
+  const liked = new Set(prefs.liked), disliked = new Set(prefs.disliked);
+  const chip = (f) => {
+    const st = liked.has(f.food.id) ? "like" : disliked.has(f.food.id) ? "avoid" : "";
+    return `<button type="button" class="pref-chip ${st}" data-action="mp-pref-chip" data-id="${f.food.id}" aria-pressed="${st ? "true" : "false"}">
+      ${esc(nm(f.food))}<span class="pref-state">${st === "like" ? t("mpLike") : st === "avoid" ? t("mpAvoid") : ""}</span></button>`;
+  };
+  openSheet(`<h2>${t("mpPrefs")}</h2>
+    <form id="mp-prefs-form">
+      <label>${t("mpBudget")}</label>
+      <div class="segmented">${[1, 2, 3].map((b) => `<label class="seg-radio"><input type="radio" name="budget" value="${b}" ${prefs.budget === b ? "checked" : ""}><span>${t("budget" + b)}</span></label>`).join("")}</div>
+      <p class="note">${t("mpBudgetNote")}</p>
+      <label style="margin-top:16px">${t("mpFoodsLabel")}</label>
+      <p class="note" style="margin:0 0 10px">${t("mpPrefsHint")}</p>
+      ${["protein", "carb", "veg", "fat", "fruit"].map((r) => `<div class="sub-label">${t("mpRole_" + r)}</div>
+        <div class="pref-chips">${foods.filter((f) => f.role === r).map(chip).join("")}</div>`).join("")}
+      <button class="btn block" type="submit" style="margin-top:18px">${t("save")}</button>
+    </form>`);
+  document.getElementById("mp-prefs-form").onsubmit = async (ev) => {
+    ev.preventDefault();
+    const ids = (cls) => [...document.querySelectorAll(`.pref-chip.${cls}`)].map((b) => Number(b.dataset.id));
+    const budget = Number(new FormData(ev.target).get("budget"));
+    try {
+      await api("/api/meal-plan/prefs", { method: "PUT", body: { budget, liked: ids("like"), disliked: ids("avoid") } });
+      closeSheet(); toast(t("saved"));
+    } catch (e) { toast(e.message); }
+  };
 }
 
 // ---------------------------------------------------------------- recipe builder
@@ -1457,10 +1592,94 @@ function chipGroup(name, options, current) {
   return `<div class="chips">${options.map((o) => `<label class="chip"><input type="radio" name="${name}" value="${o}" ${current === o ? "checked" : ""}><span>${t(o)}</span></label>`).join("")}</div>`;
 }
 
+
+// ---------------------------------------------------------------- progress dashboard
+function bars(values, { max, target, labels, cls = "" }) {
+  const top = Math.max(max ?? 0, ...values, target ?? 0) || 1;
+  return `<div class="bars ${cls}"><div class="bars-plot" style="--n:${values.length}">
+    ${target ? `<i class="bars-target" style="bottom:${(target / top) * 100}%"></i>` : ""}
+    ${values.map((v, i) => `<div class="bar-col"><span class="bar-v" style="height:${Math.max((v / top) * 100, v ? 3 : 0)}%"></span>
+      <span class="bar-l">${labels[i]}</span></div>`).join("")}</div></div>`;
+}
+
+function weightChart(weeks) {
+  // Bars start near the lightest week so small changes are visible; the scale is labelled.
+  const vals = weeks.map((w) => w.avg_kg);
+  const lo = Math.floor(Math.min(...vals) - 1), hi = Math.ceil(Math.max(...vals) + 0.5);
+  return `<div class="bars weight"><div class="bars-plot" style="--n:${weeks.length}">
+    ${weeks.map((w, i) => `<div class="bar-col"><span class="bar-num">${num(w.avg_kg)}</span>
+      <span class="bar-v" style="height:${((w.avg_kg - lo) / (hi - lo)) * 80}%"></span>
+      <span class="bar-l">${weeks.length <= 5 || i === 0 || i === weeks.length - 1 || i === Math.floor((weeks.length - 1) / 2) ? shortDate(w.week_start) : ""}</span></div>`).join("")}</div></div>
+    <p class="note">${t("weeklyAvgNote")}</p>`;
+}
+
+const shortDate = (iso) => new Date(iso + "T12:00:00").toLocaleDateString(isAr() ? "ar-SA-u-ca-gregory-nu-latn" : "en-US", { day: "numeric", month: "short" });
+const weekdayShort = (iso) => I18N[state.lang].daysShort[pyWeekday(iso)];
+const signed = (n, unit = "") => `<bdi dir="ltr">${n > 0 ? "+" : n < 0 ? "−" : ""}${num(Math.abs(n))}${unit === "%" ? "%" : ""}</bdi>${unit && unit !== "%" ? unit : ""}`;
+
+function progressView(p) {
+  const a = p.adherence, w = p.weight, n = p.nutrition;
+
+  const adherence = !a.planned_per_week ? `<p class="empty">${t("adherenceNoPlan")}</p>` : `
+    <div class="stat-row">
+      <div class="big-stat">${a.percent == null ? "—" : `${num(a.percent)}<small>%</small>`}</div>
+      <div class="stat-side">
+        <div>${tf("adherenceThisWeek", { done: num(a.this_week_done), planned: num(a.planned_per_week) })}</div>
+        <div class="dots" aria-hidden="true">${Array.from({ length: Math.max(a.planned_per_week, a.this_week_done) }, (_, i) => `<i class="${i < a.this_week_done ? "on" : ""}"></i>`).join("")}</div>
+      </div>
+    </div>
+    ${a.percent == null ? `<p class="note">${t("adherenceWait")}</p>` : ""}
+    <div class="sub-label">${t("last4Weeks")}</div>
+    ${bars(a.weeks.map((x) => x.done), { target: a.planned_per_week, labels: a.weeks.map((x) => shortDate(x.week_start)), cls: "accent" })}`;
+
+  const weight = !w.weeks.length ? `<p class="empty">${t("weightNone")}</p>` : `
+    <div class="stat-row">
+      <div><div class="sub-label">${t("latestWeight")}</div><div class="big-stat">${num(w.latest_kg)}<small>${t("kg")}</small></div></div>
+      ${w.change_kg != null ? `<div class="stat-side end"><div class="sub-label">${tf("changeOverWeeks", { n: num(w.weeks.length - 1) })}</div>
+        <div class="delta">${signed(w.change_kg, " " + t("kg"))}</div><div class="note">${signed(w.per_week_kg, " " + t("kg"))} ${t("perWeekShort")}</div></div>` : ""}
+    </div>
+    ${w.weeks.length > 1 ? weightChart(w.weeks) : ""}`;
+
+  const nutrition = !n.logged_days ? `<p class="empty">${t("nutritionNone")}</p>` : `
+    <div class="grid2 stat-pair">
+      <div><div class="sub-label">${t("avgCalories")}</div><div class="mid-stat">${num(n.avg_calories)} <small>/ ${num(n.target_calories)}</small></div>
+        <div class="note">${tf("daysOnTarget", { n: num(n.calorie_days_on_target), m: num(n.logged_days) })}</div></div>
+      <div><div class="sub-label">${t("avgProtein")}</div><div class="mid-stat p">${num(n.avg_protein)} <small>/ ${num(n.target_protein)} ${t("g")}</small></div>
+        <div class="note">${tf("daysOnTarget", { n: num(n.protein_days_on_target), m: num(n.logged_days) })}</div></div>
+    </div>
+    <div class="sub-label">${t("calories")}</div>
+    ${bars(n.days.map((d) => d.calories), { target: n.target_calories, labels: n.days.map((d) => weekdayShort(d.day)) })}
+    <div class="sub-label">${t("protein")}</div>
+    ${bars(n.days.map((d) => d.protein), { target: n.protein_min, labels: n.days.map((d) => weekdayShort(d.day)), cls: "protein" })}
+    <p class="note">${t("targetLine")}</p>`;
+
+  const lifts = !p.lifts.length ? `<p class="empty">${t("liftsNone")}</p>` : `
+    <ul class="lift-list">${p.lifts.map((l) => `<li>
+      <div><div class="lift-name">${esc(isAr() ? l.name_ar : l.name_en)}</div>
+        <div class="note">${meta(`${num(l.sessions)} ${t("workoutsWord")}`, shortDate(l.since))}</div></div>
+      <div class="lift-nums"><bdi dir="ltr">${num(l.first_e1rm)} → <b>${num(l.latest_e1rm)}</b></bdi> ${t("kg")}
+        <span class="delta ${l.change_pct >= 0 ? "up" : "down"}">${signed(l.change_pct, "%")}</span></div></li>`).join("")}</ul>
+    <p class="note">${t("liftsNote")}</p>`;
+
+  return `<div class="card"><h2>${t("adherenceTitle")}</h2>${adherence}</div>
+    <div class="card"><div class="card-head"><h2>${t("nutritionTitle")}</h2><span class="sub">${t("last7")}</span></div>${nutrition}</div>
+    <div class="card"><h2>${t("weightTitle")}</h2>${weight}</div>
+    <div class="card"><h2>${t("liftsTitle")}</h2>${lifts}</div>`;
+}
+
 async function viewProfile() {
   const p = await api("/api/profile").catch((e) => (e.status === 404 ? null : Promise.reject(e)));
   state._profile = p;
+  const tab = p ? state.profileTab : "info";
+  if (tab === "progress") {
+    const prog = await api(`/api/progress?today=${localISO()}`);
+    return renderProfilePage(p, tab, prog);
+  }
   const [ad, weights] = p ? await Promise.all([api(`/api/adaptive?today=${localISO()}`), api("/api/weights?days=2")]) : [null, []];
+  return renderProfilePage(p, tab, null, ad, weights);
+}
+
+function renderProfilePage(p, tab, prog, ad, weights) {
   const v = p || { sex: "male", age: "", height_cm: "", weight_kg: "", activity_level: "moderate", goal: "cut" };
   const activity = `<select class="input" name="activity_level">${["sedentary", "light", "moderate", "active", "very_active"].map((o) => `<option value="${o}" ${v.activity_level === o ? "selected" : ""}>${t(o)}</option>`).join("")}</select>`;
   const form = `<form class="card" id="profile-form">
@@ -1475,7 +1694,11 @@ async function viewProfile() {
       <div class="field"><label>${t("activity")}</label>${activity}</div>
       <button class="btn block" type="submit">${p ? t("save") : t("saveAndCalc")}</button>
     </form>`;
-  return `<h1>${t("profile")}</h1><p class="sub">${meta(esc(state.user.name), `<span dir="ltr">${esc(state.user.email)}</span>`)}</p>
+  const tabs = p ? `<div class="segmented page-seg">${["progress", "info"].map((k) =>
+    `<button class="${tab === k ? "on" : ""}" data-action="profile-tab" data-tab-id="${k}">${t(k + "Tab")}</button>`).join("")}</div>` : "";
+  const head = `<h1>${t("profile")}</h1><p class="sub">${meta(esc(state.user.name), `<span dir="ltr">${esc(state.user.email)}</span>`)}</p>${tabs}`;
+  if (tab === "progress") return head + progressView(prog);
+  return `${head}
     ${p ? targetsCards(p) + adaptiveCard(ad, weights) + form : `<p class="sub">${t("setupProfile")}</p>` + form}
     <form class="card" id="social-form">
       <h2>${t("socialSettings")}</h2>
@@ -1527,6 +1750,27 @@ document.addEventListener("click", async (ev) => {
     else if (a === "rest-add") { timer.left += 30; drawRest(); }
     else if (a === "guide") await showGuide(el.dataset.key);
     else if (a === "open-user") await openUser(el.dataset.u);
+    else if (a === "mp-make") await makeMealPlan();
+    else if (a === "mp-clear") { state.mealPlan = null; saveMealPlan(); render(); }
+    else if (a === "mp-prefs") await openMealPrefs();
+    else if (a === "mp-swap") await openSwaps(Number(el.dataset.meal), Number(el.dataset.item));
+    else if (a === "mp-pick") {
+      const { mi, ii, swaps } = state._swaps;
+      state.mealPlan.meals[mi].items[ii] = swaps[Number(el.dataset.i)];
+      recountMealPlan(); saveMealPlan(); closeSheet(); render();
+    } else if (a === "mp-pref-chip") {
+      const next = el.classList.contains("like") ? "avoid" : el.classList.contains("avoid") ? "" : "like";
+      el.classList.remove("like", "avoid"); if (next) el.classList.add(next);
+      el.setAttribute("aria-pressed", next ? "true" : "false");
+      el.querySelector(".pref-state").textContent = next === "like" ? t("mpLike") : next === "avoid" ? t("mpAvoid") : "";
+    } else if (a === "mp-log") {
+      for (const m of state.mealPlan.meals) {
+        if (!m.items.length) continue;
+        await api("/api/meals/batch", { method: "POST", body: { day: state.foodDay, meal_type: m.meal_type, items: m.items.map((i) => ({ food_id: i.food.id, grams: i.grams })) } });
+      }
+      state.mealPlan = null; saveMealPlan(); toast(t("mpLogged")); render();
+    }
+    else if (a === "profile-tab") { state.profileTab = el.dataset.tabId; render(); }
     else if (a === "food-tab") { state.foodTab = el.dataset.tabId; state.selectedFood = null; render(); }
     else if (a === "water") {
       const card = document.getElementById("water-card");
