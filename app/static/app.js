@@ -93,6 +93,13 @@ const I18N = {
     days: ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
     dayOrder: [5, 6, 0, 1, 2, 3, 4],
     daysShort: ["إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت", "أحد"],
+    musclesTitle: "عضلاتك هالأسبوع", musclesWeekOf: "أسبوع {d}", musclesTrained: "اشتغلت على {n} من {m} عضلة",
+    st_none: "ما تمرنت", st_low: "قليل", st_close: "قريب", st_good: "ممتاز", st_high: "كثير",
+    setsShort: "مجموعة", idealSets: "المثالي 10 إلى 20 مجموعة بالأسبوع لكل عضلة. التمارين المساعدة تنحسب نص مجموعة.",
+    musclesFocus: "ركّز عليها بتمرينك الجاي: {list}", musclesNone: "سجّل تمرين هالأسبوع عشان تتلون عضلاتك هنا.",
+    thisWeek: "هالأسبوع", prevWeek: "الأسبوع اللي قبل", nextWeek: "الأسبوع اللي بعد",
+    strengthTitle: "قوة كل عضلة", strengthSub: "آخر 8 أسابيع", strengthNone: "سجّل نفس التمرين مرتين بأسبوعين مختلفين عشان يطلع تطور عضلاته.",
+    strengthNote: "كل تمرين ينقاس على أول مرة سويته، والعضلة متوسط تمارينها.", exercisesCount: "{n} تمارين", exerciseOne: "تمرين واحد",
     progressTab: "تقدّمي", infoTab: "معلوماتي", progressTitle: "تقدّمك",
     adherenceTitle: "الالتزام بالتمارين", adherenceThisWeek: "هالأسبوع: {done} من {planned}", adherenceNoPlan: "سوّ جدول تمارين عشان نحسب التزامك.",
     adherenceWait: "بعد أول أسبوع كامل بتطلع لك النسبة.", last4Weeks: "آخر 4 أسابيع", workoutsWord: "تمارين",
@@ -202,6 +209,13 @@ const I18N = {
     days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
     dayOrder: [0, 1, 2, 3, 4, 5, 6],
     daysShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    musclesTitle: "Your muscles this week", musclesWeekOf: "Week of {d}", musclesTrained: "You trained {n} of {m} muscles",
+    st_none: "Not trained", st_low: "Low", st_close: "Close", st_good: "Ideal", st_high: "A lot",
+    setsShort: "sets", idealSets: "Aim for 10 to 20 sets per muscle per week. Helper muscles count as half a set.",
+    musclesFocus: "Give these some work next session: {list}", musclesNone: "Log a workout this week and your muscles light up here.",
+    thisWeek: "This week", prevWeek: "Previous week", nextWeek: "Next week",
+    strengthTitle: "Strength by muscle", strengthSub: "Last 8 weeks", strengthNone: "Log the same exercise in two different weeks to see that muscle's trend.",
+    strengthNote: "Each exercise is measured against your first session; a muscle is the average of its exercises.", exercisesCount: "{n} exercises", exerciseOne: "1 exercise",
     progressTab: "Progress", infoTab: "My info", progressTitle: "Your progress",
     adherenceTitle: "Workout consistency", adherenceThisWeek: "This week: {done} of {planned}", adherenceNoPlan: "Make a workout plan to track consistency.",
     adherenceWait: "Your score appears after your first full week.", last4Weeks: "Last 4 weeks", workoutsWord: "workouts",
@@ -238,6 +252,7 @@ const state = {
   authMode: "login",
   editDay: null,
   profileTab: "progress",
+  muscleWeeksAgo: 0,
   mealPlan: (() => { try { return JSON.parse(localStorage.getItem("mealPlan")); } catch { return null; } })(),
   user: null,
   foodDay: localISO(),
@@ -947,8 +962,8 @@ document.addEventListener("change", async (ev) => {
 
 // ---------------------------------------------------------------- exercise guide
 // A simple, original front/back body diagram. Muscles are coloured by role.
-function bodyMap(primary, secondary) {
-  const fill = (m) => primary.includes(m) ? "var(--protein)" : secondary.includes(m) ? "color-mix(in srgb, var(--protein) 40%, var(--surface-3))" : "var(--surface-3)";
+function bodyMap(primary, secondary, fillFor = null) {
+  const fill = (m) => fillFor ? fillFor(m) : primary.includes(m) ? "var(--protein)" : secondary.includes(m) ? "color-mix(in srgb, var(--protein) 40%, var(--surface-3))" : "var(--surface-3)";
   const r = (m, x, y, w, h, rx = 5) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill(m)}"/>`;
   const e = (m, cx, cy, rx, ry) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill(m)}"/>`;
   const base = (c) => `<circle cx="${c}" cy="16" r="10" fill="var(--surface-3)"/><rect x="${c - 4}" y="25" width="8" height="8" fill="var(--surface-3)"/>`;
@@ -1617,7 +1632,68 @@ const shortDate = (iso) => new Date(iso + "T12:00:00").toLocaleDateString(isAr()
 const weekdayShort = (iso) => I18N[state.lang].daysShort[pyWeekday(iso)];
 const signed = (n, unit = "") => `<bdi dir="ltr">${n > 0 ? "+" : n < 0 ? "−" : ""}${num(Math.abs(n))}${unit === "%" ? "%" : ""}</bdi>${unit && unit !== "%" ? unit : ""}`;
 
-function progressView(p) {
+
+// Weekly sets per muscle, drawn on the body map: the more ideal the volume, the stronger the green.
+const MUSCLE_FILL = {
+  none: "var(--surface-3)",
+  low: "color-mix(in srgb, var(--accent) 30%, var(--surface-3))",
+  close: "color-mix(in srgb, var(--accent) 62%, var(--surface-3))",
+  good: "var(--accent)",
+  high: "color-mix(in srgb, var(--accent) 60%, var(--text))",
+};
+// The muscles a balanced program should hit every week (small helpers are left out of the hint).
+const MAIN_MUSCLES = ["chest", "lats", "shoulders", "quads", "hamstrings", "glutes", "biceps", "triceps"];
+
+function muscleCard(m) {
+  const map = m.map, byRegion = Object.fromEntries(map.regions.map((r) => [r.region, r]));
+  const weekNav = `<div class="week-nav">
+    <button class="icon-btn" data-action="muscle-week" data-d="1" aria-label="${t("prevWeek")}">‹</button>
+    <span>${state.muscleWeeksAgo === 0 ? t("thisWeek") : tf("musclesWeekOf", { d: shortDate(map.week_start) })}</span>
+    <button class="icon-btn" data-action="muscle-week" data-d="-1" aria-label="${t("nextWeek")}" ${state.muscleWeeksAgo === 0 ? "disabled" : ""}>›</button></div>`;
+  if (!map.trained) {
+    return `<div class="card"><div class="card-head"><h2>${t("musclesTitle")}</h2></div>${weekNav}
+      ${bodyMap([], [], () => MUSCLE_FILL.none)}<p class="empty">${t("musclesNone")}</p></div>`;
+  }
+  const focus = MAIN_MUSCLES.filter((r) => ["none", "low"].includes(byRegion[r].status)).map((r) => t("mu_" + r));
+  const rows = [...map.regions].sort((a, b) => b.sets - a.sets).map((r) => `
+    <li class="mrow ${r.status}">
+      <span class="mrow-name"><i style="background:${MUSCLE_FILL[r.status]}"></i>${t("mu_" + r.region)}</span>
+      <span class="mrow-track" aria-hidden="true"><span class="mrow-zone"></span><span class="mrow-fill" style="width:${Math.min(r.sets / 25, 1) * 100}%"></span></span>
+      <span class="mrow-num"><b>${num(r.sets)}</b> <span class="mrow-st">${t("st_" + r.status)}</span></span>
+    </li>`).join("");
+  return `<div class="card">
+    <h2>${t("musclesTitle")}</h2>${weekNav}
+    <p class="sub" style="margin:0 0 6px">${tf("musclesTrained", { n: num(map.trained), m: num(map.regions.length) })}</p>
+    ${bodyMap([], [], (r) => MUSCLE_FILL[byRegion[r]?.status || "none"])}
+    <div class="mlegend">${["none", "low", "close", "good", "high"].map((k) => `<span><i style="background:${MUSCLE_FILL[k]}"></i>${t("st_" + k)}</span>`).join("")}</div>
+    ${focus.length ? `<p class="focus-hint">${tf("musclesFocus", { list: focus.join("، ") })}</p>` : ""}
+    <ul class="mrows">${rows}</ul>
+    <p class="note">${t("idealSets")}</p>
+  </div>`;
+}
+
+function sparkline(series) {
+  const W = 96, H = 30, vals = series.map((p) => p.index);
+  const lo = Math.min(...vals, 100), hi = Math.max(...vals, 100), span = hi - lo || 1;
+  const x = (i) => (series.length === 1 ? W / 2 : (i * W) / (series.length - 1));
+  const y = (v) => H - 3 - ((v - lo) / span) * (H - 6);
+  const d = series.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.index).toFixed(1)}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" direction="ltr" aria-hidden="true">
+    <line x1="0" x2="${W}" y1="${y(100)}" y2="${y(100)}" class="spark-base"/>
+    <path d="${d}"/><circle cx="${x(series.length - 1)}" cy="${y(vals.at(-1))}" r="3"/></svg>`;
+}
+
+function strengthCard(groups) {
+  const body = !groups.length ? `<p class="empty">${t("strengthNone")}</p>` : `
+    <ul class="glist">${groups.map((g) => `<li>
+      <div><div class="lift-name">${t("m_" + g.group)}</div><div class="note">${g.exercises === 1 ? t("exerciseOne") : tf("exercisesCount", { n: num(g.exercises) })}</div></div>
+      ${sparkline(g.series)}
+      <span class="delta ${g.change_pct >= 0 ? "up" : "down"} big">${signed(g.change_pct, "%")}</span></li>`).join("")}</ul>
+    <p class="note">${t("strengthNote")}</p>`;
+  return `<div class="card"><div class="card-head"><h2>${t("strengthTitle")}</h2><span class="sub">${t("strengthSub")}</span></div>${body}</div>`;
+}
+
+function progressView(p, muscles) {
   const a = p.adherence, w = p.weight, n = p.nutrition;
 
   const adherence = !a.planned_per_week ? `<p class="empty">${t("adherenceNoPlan")}</p>` : `
@@ -1661,7 +1737,8 @@ function progressView(p) {
         <span class="delta ${l.change_pct >= 0 ? "up" : "down"}">${signed(l.change_pct, "%")}</span></div></li>`).join("")}</ul>
     <p class="note">${t("liftsNote")}</p>`;
 
-  return `<div class="card"><h2>${t("adherenceTitle")}</h2>${adherence}</div>
+  return `${muscleCard(muscles)}${strengthCard(muscles.groups)}
+    <div class="card"><h2>${t("adherenceTitle")}</h2>${adherence}</div>
     <div class="card"><div class="card-head"><h2>${t("nutritionTitle")}</h2><span class="sub">${t("last7")}</span></div>${nutrition}</div>
     <div class="card"><h2>${t("weightTitle")}</h2>${weight}</div>
     <div class="card"><h2>${t("liftsTitle")}</h2>${lifts}</div>`;
@@ -1672,8 +1749,11 @@ async function viewProfile() {
   state._profile = p;
   const tab = p ? state.profileTab : "info";
   if (tab === "progress") {
-    const prog = await api(`/api/progress?today=${localISO()}`);
-    return renderProfilePage(p, tab, prog);
+    const [prog, muscles] = await Promise.all([
+      api(`/api/progress?today=${localISO()}`),
+      api(`/api/progress/muscles?today=${localISO()}&weeks_ago=${state.muscleWeeksAgo}`),
+    ]);
+    return renderProfilePage(p, tab, { prog, muscles });
   }
   const [ad, weights] = p ? await Promise.all([api(`/api/adaptive?today=${localISO()}`), api("/api/weights?days=2")]) : [null, []];
   return renderProfilePage(p, tab, null, ad, weights);
@@ -1697,7 +1777,7 @@ function renderProfilePage(p, tab, prog, ad, weights) {
   const tabs = p ? `<div class="segmented page-seg">${["progress", "info"].map((k) =>
     `<button class="${tab === k ? "on" : ""}" data-action="profile-tab" data-tab-id="${k}">${t(k + "Tab")}</button>`).join("")}</div>` : "";
   const head = `<h1>${t("profile")}</h1><p class="sub">${meta(esc(state.user.name), `<span dir="ltr">${esc(state.user.email)}</span>`)}</p>${tabs}`;
-  if (tab === "progress") return head + progressView(prog);
+  if (tab === "progress") return head + progressView(prog.prog, prog.muscles);
   return `${head}
     ${p ? targetsCards(p) + adaptiveCard(ad, weights) + form : `<p class="sub">${t("setupProfile")}</p>` + form}
     <form class="card" id="social-form">
@@ -1770,6 +1850,7 @@ document.addEventListener("click", async (ev) => {
       }
       state.mealPlan = null; saveMealPlan(); toast(t("mpLogged")); render();
     }
+    else if (a === "muscle-week") { state.muscleWeeksAgo = Math.max(0, state.muscleWeeksAgo + Number(el.dataset.d)); render(); }
     else if (a === "profile-tab") { state.profileTab = el.dataset.tabId; render(); }
     else if (a === "food-tab") { state.foodTab = el.dataset.tabId; state.selectedFood = null; render(); }
     else if (a === "water") {

@@ -113,3 +113,104 @@ def nutrition_summary(daily: dict[date, tuple[float, float]], today: date, calor
         "calorie_days_on_target": sum(1 for x in logged if abs(x["calories"] - calories) <= calories * 0.1),
         "protein_days_on_target": sum(1 for x in logged if x["protein"] >= protein_min),
     }
+
+
+# ---------------------------------------------------------------- muscles
+# Body-map regions (same ids as the exercise guides).
+REGIONS = [
+    "chest", "shoulders", "rear_delts", "traps", "lats", "lower_back", "biceps",
+    "triceps", "forearms", "abs", "glutes", "quads", "hamstrings", "calves",
+]  # fmt: skip
+
+
+def _status(sets: float) -> str:
+    """Weekly hard sets per muscle. Hypertrophy research points to roughly 10-20 sets
+    per muscle per week for most people; fewer still helps, more stops paying off."""
+    if sets == 0:
+        return "none"
+    if sets < 6:
+        return "low"
+    if sets < 10:
+        return "close"
+    if sets <= 20:
+        return "good"
+    return "high"
+
+
+def weekly_muscle_sets(
+    sets: list[tuple[date, str]], muscles_for: dict[str, tuple[list[str], list[str]]], start: date, end: date
+) -> dict[str, float]:
+    """Sets per body region between `start` and `end` (inclusive).
+
+    A set counts fully for the exercise's main muscles and half for the helpers,
+    the usual way coaches count indirect work.
+    """
+    totals = dict.fromkeys(REGIONS, 0.0)
+    for day, key in sets:
+        if not start <= day <= end or key not in muscles_for:
+            continue
+        primary, secondary = muscles_for[key]
+        for m in primary:
+            if m in totals:
+                totals[m] += 1
+        for m in secondary:
+            if m in totals and m not in primary:
+                totals[m] += 0.5
+    return {m: round(v, 1) for m, v in totals.items()}
+
+
+def muscle_map(sets, muscles_for, week_start_day: date, today: date) -> dict:
+    end = min(week_start_day + timedelta(days=6), today)
+    totals = weekly_muscle_sets(sets, muscles_for, week_start_day, end)
+    return {
+        "week_start": week_start_day,
+        "week_end": end,
+        "regions": [{"region": m, "sets": v, "status": _status(v)} for m, v in totals.items()],
+        "trained": sum(1 for v in totals.values() if v > 0),
+    }
+
+
+def strength_by_group(
+    sets: list[tuple[date, str, float, int]], group_of: dict[str, str], today: date, weeks: int = 8
+) -> list[dict]:
+    """Strength trend per muscle group over the last `weeks` weeks.
+
+    Each exercise is scored against its own first session in the window (= 100), using
+    the best estimated 1RM per session. A group's weekly index is the average over its
+    exercises, so a heavy squat and a light leg curl count equally.
+    """
+    first_week = week_start(today) - timedelta(weeks=weeks - 1)
+    best: dict[str, dict[date, float]] = defaultdict(dict)
+    for day, key, weight, reps in sets:
+        if day < first_week or day > today or weight <= 0 or reps <= 0 or key not in group_of:
+            continue
+        best[key][day] = max(best[key].get(day, 0), e1rm(weight, reps))
+
+    per_group: dict[str, dict[date, list[float]]] = defaultdict(lambda: defaultdict(list))
+    exercises: dict[str, set[str]] = defaultdict(set)
+    for key, by_day in best.items():
+        if len(by_day) < 2:
+            continue
+        days = sorted(by_day)
+        base = by_day[days[0]]
+        weekly: dict[date, float] = {}
+        for d in days:
+            weekly[week_start(d)] = max(weekly.get(week_start(d), 0), by_day[d] / base * 100)
+        group = group_of[key]
+        exercises[group].add(key)
+        for ws, value in weekly.items():
+            per_group[group][ws].append(value)
+
+    out = []
+    for group, by_week in per_group.items():
+        series = [{"week_start": ws, "index": round(sum(v) / len(v), 1)} for ws, v in sorted(by_week.items())]
+        out.append(
+            {
+                "group": group,
+                "exercises": len(exercises[group]),
+                "change_pct": round(series[-1]["index"] - 100, 1),
+                "series": series,
+            }
+        )
+    out.sort(key=lambda g: -g["change_pct"])
+    return out

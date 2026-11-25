@@ -6,10 +6,11 @@ from fastapi import APIRouter, Query
 from sqlmodel import func, select
 
 from app.deps import CurrentUser, SessionDep
-from app.models import Food, MealEntry, PlanDay, Profile, SetLog, WeightLog, WorkoutLog, WorkoutPlan
+from app.models import CustomExercise, Food, MealEntry, PlanDay, Profile, SetLog, WeightLog, WorkoutLog, WorkoutPlan
 from app.services import progress
+from app.services.exercise_guides import GUIDES
 from app.services.nutrition import calculate_targets
-from app.services.workouts import EXERCISES
+from app.services.workouts import CUSTOM_PREFIX, EXERCISES
 
 router = APIRouter(tags=["progress"])
 
@@ -78,4 +79,35 @@ def get_progress(
                 daily, today, targets.calories if targets else 0, targets.protein_min_g if targets else 0
             ),
         },
+    }
+
+
+@router.get("/api/progress/muscles")
+def muscle_progress(
+    user: CurrentUser,
+    session: SessionDep,
+    today: date | None = Query(None, description="The user's local date."),
+    weeks_ago: int = Query(0, ge=0, le=26, description="0 = this week, 1 = last week, ..."),
+):
+    """Sets per muscle for one week (for the body map) and strength trend per muscle group."""
+    from app.routers.workouts import GROUP_TO_MUSCLES
+
+    today = today or date.today()
+    muscles_for = {k: (g["primary"], g["secondary"]) for k, g in GUIDES.items()}
+    group_of = {k: v["muscle"] for k, v in EXERCISES.items() if v["muscle"] != "cardio"}
+    for c in session.exec(select(CustomExercise).where(CustomExercise.user_id == user.id)):
+        key = f"{CUSTOM_PREFIX}{c.id}"
+        muscles_for[key] = (GROUP_TO_MUSCLES.get(c.muscle, []), [])
+        if c.muscle not in ("cardio", "other"):
+            group_of[key] = c.muscle
+
+    rows = session.exec(
+        select(WorkoutLog.day, SetLog.exercise_key, SetLog.weight_kg, SetLog.reps)
+        .join(SetLog, SetLog.workout_log_id == WorkoutLog.id)
+        .where(WorkoutLog.user_id == user.id, WorkoutLog.day >= today - timedelta(weeks=max(9, weeks_ago + 1)))
+    ).all()
+    week = progress.week_start(today) - timedelta(weeks=weeks_ago)
+    return {
+        "map": progress.muscle_map([(d, k) for d, k, _, _ in rows], muscles_for, week, today),
+        "groups": progress.strength_by_group(list(rows), group_of, today),
     }

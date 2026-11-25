@@ -580,3 +580,34 @@ details[open] summary { margin-bottom: 14px; }
 .pref-chip.avoid { border-color: var(--danger); text-decoration: line-through; color: var(--muted); }
 .pref-chip.avoid .pref-state { color: var(--danger); text-decoration: none; }
 .mp-total .mid-stat { font-size: var(--t-lg); }
+
+/* ------------------------------------------------------------------ muscles */
+.week-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -6px 0 10px; font-size: var(--t-sm); font-weight: 600; }
+.week-nav .icon-btn { font-size: 22px; color: var(--text); }
+.week-nav .icon-btn:hover { color: var(--text); }
+.week-nav .icon-btn:disabled { opacity: .3; cursor: default; background: none; }
+.mlegend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font-size: var(--t-xs); color: var(--muted); margin: 6px 0 14px; }
+.mlegend span { display: inline-flex; align-items: center; gap: 5px; }
+.mlegend i, .mrow-name i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.focus-hint { margin: 0 0 12px; padding: 10px 12px; border-radius: var(--r-md); background: var(--accent-soft); font-size: var(--t-sm); }
+.mrows { list-style: none; margin: 0 0 4px; padding: 0; }
+.mrow { display: grid; grid-template-columns: 110px 1fr auto; gap: 10px; align-items: center; padding: 7px 0; font-size: var(--t-sm); }
+.mrow-name { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.mrow-track { position: relative; height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+/* the 10-20 sets zone, on a 0-25 scale */
+.mrow-zone { position: absolute; inset-block: 0; inset-inline-start: 40%; width: 40%; background: var(--accent-soft); }
+.mrow-fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 99px; background: var(--accent); }
+.mrow.low .mrow-fill, .mrow.close .mrow-fill { background: color-mix(in srgb, var(--accent) 55%, var(--surface-3)); }
+.mrow.high .mrow-fill { background: color-mix(in srgb, var(--accent) 60%, var(--text)); }
+.mrow-num { min-width: 92px; text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mrow-st { font-size: var(--t-xs); color: var(--muted); }
+.mrow.good .mrow-st { color: var(--accent); font-weight: 600; }
+.mrow.none { color: var(--muted); }
+.glist { list-style: none; margin: 0; padding: 0; }
+.glist li { display: grid; grid-template-columns: 1fr auto 72px; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); }
+.glist li:first-child { border-top: 0; padding-top: 0; }
+.spark { width: 96px; height: 30px; }
+.spark path { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.spark circle { fill: var(--accent); }
+.spark-base { stroke: var(--border); stroke-dasharray: 3 3; }
+.delta.big { font-size: var(--t-lg); text-align: end; margin: 0; }

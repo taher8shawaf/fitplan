@@ -23,6 +23,7 @@ A bilingual (Arabic / English) web app that builds your gym schedule, tracks you
 - **Progressive overload suggestions.** Uses double progression: if you hit the top of the rep range on every working set, it suggests adding 2.5 kg next time.
 - **Progress chart.** Estimated 1RM over time per exercise (Epley formula).
 - **Progress dashboard.** One page for the big picture: workout consistency (done vs planned per week), weekly average body weight and its trend, the last 7 days of calories and protein against your targets, and how much your main lifts have improved.
+- **Muscle tracking.** A weekly body map coloured by how many sets each of 14 muscles got (helper muscles count as half a set), measured against the 10–20 sets/week range, with a "give these some work" hint for neglected muscles and a week-by-week history. Plus a strength trend per muscle group over 8 weeks, where each exercise is scored against your own first session.
 - **Smart meal planner.** Builds a full day (breakfast, lunch, dinner, snack) sized to your calories and protein, shows protein per meal, swaps any food for an equivalent (same protein, or same calories), and respects a budget level plus foods you like or want to avoid. Log the whole plan in one tap.
 - **Meal tracking.** A built-in food database with common Arabic and Gulf foods (kabsa, foul, labneh, dates, hummus…), meal logging by day, remaining calories and macros, and private custom foods.
 - **Exercise guides.** Every exercise has step-by-step instructions, a safety tip, a front/back muscle map of the muscles it works, and a link to video demos.
@@ -132,6 +133,7 @@ tests/
 | GET / PUT / DELETE | `/api/weights` | Body weight (one entry per day) |
 | GET | `/api/adaptive` | Measured daily burn (or progress toward enough data) |
 | GET | `/api/progress?today=` | Dashboard: weekly weight, lifts, adherence, last 7 days of nutrition |
+| GET | `/api/progress/muscles?today=&weeks_ago=` | Sets per muscle for a week, strength trend per muscle group |
 | POST | `/api/meal-plan` | Generate a day of meals for your targets |
 | POST | `/api/meal-plan/alternatives` | Swaps for one food in the plan |
 | GET / PUT | `/api/meal-plan/prefs` | Budget and liked / avoided foods |
@@ -183,6 +185,7 @@ tests/
 - **اقتراح زيادة الوزن:** إذا وصلت لأعلى عدد تكرارات في كل المجموعات، يقترح عليك تزيد 2.5 كغ في التمرين الجاي.
 - **رسم بياني للتقدم:** يوضح تطور أقصى وزن متوقع (1RM) لكل تمرين.
 - **لوحة التقدّم:** صفحة وحدة فيها نسبة التزامك بالتمارين، ووزنك الأسبوعي واتجاهه، وسعراتك وبروتينك آخر 7 أيام مقارنة بهدفك، وكم تطورت أوزانك.
+- **متابعة العضلات:** خريطة جسم أسبوعية تتلون حسب عدد المجموعات لكل عضلة من 14 عضلة، مقارنة بالمثالي (10 إلى 20 مجموعة بالأسبوع)، وتنبيه للعضلات اللي ناقصها شغل، وتقدر ترجع للأسابيع اللي قبل. ومعها تطور قوة كل عضلة خلال 8 أسابيع.
 - **مخطط الوجبات الذكي:** يبني لك يوم أكل كامل على قد سعراتك وبروتينك، ويوريك البروتين بكل وجبة، وتقدر تبدّل أي أكلة ببديل يعطي نفس البروتين أو السعرات، وياخذ بعين الاعتبار ميزانيتك والأكل اللي تحبه أو ما تبيه.
 - **تنظيم الأكل:** قاعدة أطعمة فيها أكلات عربية وخليجية (كبسة، فول، لبنة، تمر، حمص…)، وتسجيل الوجبات لكل يوم، ويوريك كم باقي لك. وتقدر تضيف أكلاتك الخاصة.
 - **شرح التمارين:** خطوات الأداء، ونصيحة، ورسم يوضح العضلات اللي يشغّلها كل تمرين، ورابط فيديو.

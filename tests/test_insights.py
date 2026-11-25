@@ -189,3 +189,66 @@ def test_meal_plan_endpoints(client, auth):
 def test_prefs_are_per_user(client, auth, other_auth):
     client.put("/api/meal-plan/prefs", json={"budget": 3}, headers=auth)
     assert client.get("/api/meal-plan/prefs", headers=other_auth).json()["budget"] == 2
+
+
+# ---------------------------------------------------------------- muscles
+def test_set_status_bands():
+    assert [progress._status(x) for x in (0, 3, 8, 10, 20, 21)] == ["none", "low", "close", "good", "good", "high"]
+
+
+def test_weekly_muscle_sets_count_helpers_as_half():
+    muscles = {"bench_press": (["chest"], ["triceps", "shoulders"]), "barbell_curl": (["biceps"], ["forearms"])}
+    monday = date(2026, 11, 23)
+    sets = [(monday, "bench_press")] * 3 + [(monday + timedelta(days=2), "barbell_curl")] * 2
+    sets += [(monday - timedelta(days=1), "bench_press")]  # last week: not counted
+    totals = progress.weekly_muscle_sets(sets, muscles, monday, TODAY)
+    assert totals["chest"] == 3 and totals["triceps"] == 1.5 and totals["biceps"] == 2 and totals["forearms"] == 1
+    assert totals["quads"] == 0
+
+
+def test_strength_by_group_indexes_each_exercise_to_its_first_session():
+    groups = {"squat": "legs", "leg_curl": "legs", "bench_press": "chest"}
+    sets = [
+        (date(2026, 10, 5), "squat", 100, 5),
+        (date(2026, 11, 23), "squat", 110, 5),  # +10%
+        (date(2026, 10, 6), "leg_curl", 40, 10),
+        (date(2026, 11, 24), "leg_curl", 48, 10),  # +20%
+        (date(2026, 11, 24), "bench_press", 80, 5),  # one session only: no trend
+    ]
+    out = progress.strength_by_group(sets, groups, TODAY)
+    assert [g["group"] for g in out] == ["legs"]
+    legs = out[0]
+    assert legs["exercises"] == 2 and legs["change_pct"] == 15.0
+    assert legs["series"][0]["index"] == 100
+
+
+def test_muscle_endpoint(client, auth):
+    client.post("/api/workouts/plan", json={"weekdays": [0, 2, 4]}, headers=auth)
+    day = client.get("/api/workouts/plan", headers=auth).json()["days"][0]
+    for d, w in [(TODAY - timedelta(days=14), 60), (TODAY, 66)]:
+        sets = [{"exercise_key": "squat", "set_number": n, "weight_kg": w, "reps": 8} for n in (1, 2, 3)]
+        body = {"day": str(d), "plan_day_id": day["id"], "sets": sets}
+        assert client.post("/api/workouts/logs", json=body, headers=auth).status_code == 201
+
+    res = client.get(f"/api/progress/muscles?today={TODAY}", headers=auth).json()
+    regions = {r["region"]: r for r in res["map"]["regions"]}
+    assert regions["quads"]["sets"] == 3 and regions["quads"]["status"] == "low"
+    assert regions["chest"]["status"] == "none"
+    assert res["groups"][0]["group"] == "legs" and res["groups"][0]["change_pct"] == 10.0
+
+    last_week = client.get(f"/api/progress/muscles?today={TODAY}&weeks_ago=1", headers=auth).json()
+    assert last_week["map"]["trained"] == 0
+
+
+def test_muscle_endpoint_counts_custom_exercises(client, auth):
+    ex = client.post(
+        "/api/exercises", json={"name_ar": "س", "name_en": "Cable thing", "muscle": "chest"}, headers=auth
+    ).json()
+    client.post("/api/workouts/plan/custom", json={"days": []}, headers=auth)
+    body = {"day": str(TODAY), "sets": [{"exercise_key": ex["key"], "set_number": 1, "weight_kg": 20, "reps": 10}]}
+    assert client.post("/api/workouts/logs", json=body, headers=auth).status_code == 201
+    regions = {
+        r["region"]: r["sets"]
+        for r in client.get(f"/api/progress/muscles?today={TODAY}", headers=auth).json()["map"]["regions"]
+    }
+    assert regions["chest"] == 1
