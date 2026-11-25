@@ -34,7 +34,7 @@ const I18N = {
     startCustom: "ابدأ من الصفر", replaceWarn: "جدولك الحالي بيتبدل (سجل تمارينك ما ينحذف).",
     dayName: "اسم اليوم (مثلاً: صدر وتراي)", deleteDay: "حذف اليوم", sure: "متأكد؟",
     addDay: "أضف يوم تمرين", allDaysUsed: "كل أيام الأسبوع مستخدمة", pickExerciseOpt: "اختر تمرين…",
-    sets: "مجموعات", repsShort: "تكرار", emptyDay: "ما فيه تمارين. أضف من تحت 👇",
+    sets: "مجموعات", repsShort: "تكرار", emptyDay: "ما فيه تمارين. أضف أول تمرين من تحت.",
     customExercise: "تمرين مو موجود؟ أضفه بنفسك", muscle: "العضلة", createExercise: "حفظ التمرين",
     myExercises: "تماريني",
     theme: "تبديل المظهر", rest: "راحة", restDone: "يلا المجموعة الجاية", setsWord: "مجموعة",
@@ -92,6 +92,9 @@ const I18N = {
     m_chest: "صدر", m_back: "ظهر", m_shoulders: "أكتاف", m_legs: "أرجل", m_arms: "ذراع", m_core: "بطن", m_cardio: "كارديو", m_other: "أخرى", todayTag: "اليوم",
     days: ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
     dayOrder: [5, 6, 0, 1, 2, 3, 4],
+    daysShort: ["إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت", "أحد"],
+    yourWeek: "أسبوعك", trainingDays: "أيام تمرين", minutesShort: "دقيقة", editDay: "تعديل", doneEditing: "تم",
+    workoutN: "التمرين {n}", tapDay: "اضغط على يوم عشان تروح له",
   },
   en: {
     tagline: "Your workouts and meals, organized in one place",
@@ -183,6 +186,9 @@ const I18N = {
     m_chest: "Chest", m_back: "Back", m_shoulders: "Shoulders", m_legs: "Legs", m_arms: "Arms", m_core: "Core", m_cardio: "Cardio", m_other: "Other", todayTag: "Today",
     days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
     dayOrder: [0, 1, 2, 3, 4, 5, 6],
+    daysShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    yourWeek: "Your week", trainingDays: "training days", minutesShort: "min", editDay: "Edit", doneEditing: "Done",
+    workoutN: "Workout {n}", tapDay: "Tap a day to jump to it",
   },
 };
 
@@ -200,6 +206,7 @@ const state = {
   token: store.get("token"),
   tab: "today",
   authMode: "login",
+  editDay: null,
   user: null,
   foodDay: localISO(),
   foodQuery: "",
@@ -450,7 +457,7 @@ function workoutCard(w) {
             <button type="button" class="check" data-action="toggle-set" aria-label="done">${ICONS.check}</button>
           </div>`).join("");
         return `<div class="ex">
-          <div class="ex-head"><button type="button" class="ex-name linkish" data-action="guide" data-key="${e.exercise_key}">${esc(nm(e))}<span class="info">i</span></button><span class="ex-meta">${num(e.sets)} × <bdi dir="ltr">${esc(e.reps)}</bdi></span></div>
+          <div class="ex-head"><button type="button" class="ex-name linkish" data-action="guide" data-key="${e.exercise_key}">${esc(nm(e))}<span class="info">i</span></button><span class="ex-meta"><bdi dir="ltr">${num(e.sets)} × ${esc(e.reps)}</bdi></span></div>
           ${last ? `<div class="hint">${meta(last, next)}</div>` : ""}
           ${BARBELL_EXERCISES.has(e.exercise_key) ? `<div class="barbell" data-key="${e.exercise_key}">${barbellView(e.suggested_weight_kg)}</div>` : ""}
           <div class="set-head"><span></span><span>${t("kg")}</span><span>${t("reps")}</span><span></span></div>
@@ -712,12 +719,60 @@ function lineChart(points) {
   </svg>`;
 }
 
-function dayCard(d, usedDays) {
+// Read-only day: what you'll do, at a glance. Editing controls only appear after "Edit".
+function dayCard(d, usedDays, n) {
+  if (state.editDay === d.id || !d.exercises.length) return dayEditor(d, usedDays, n);
+  const L = I18N[state.lang];
+  const isToday = d.weekday === pyWeekday(localISO());
+  const sets = d.exercises.reduce((sum, e) => sum + e.sets, 0);
+  const minutes = Math.max(10, Math.round((sets * 2.5) / 5) * 5); // ~2.5 min per set incl. rest
+  const muscles = [...new Set(d.exercises.map((e) => e.muscle))];
+  const items = d.exercises.map((e, i) => `
+    <li class="pd-ex">
+      <span class="pd-i" aria-hidden="true">${num(i + 1)}</span>
+      <button class="pd-name linkish" data-action="guide" data-key="${e.exercise_key}">${esc(nm(e))}<span class="info">i</span></button>
+      <span class="pd-sr"><bdi dir="ltr">${num(e.sets)} × ${esc(e.reps)}</bdi></span>
+    </li>`).join("");
+  return `<section class="card plan-day ${isToday ? "is-today" : ""}" id="day-${d.id}">
+    <div class="pd-head">
+      <span class="pd-num" aria-hidden="true">${num(n)}</span>
+      <div class="pd-titles">
+        <div class="pd-weekday">${L.days[d.weekday]}${isToday ? ` <span class="pill today">${t("todayTag")}</span>` : ""}</div>
+        <h2 class="pd-title">${esc(dayTitle(d))}</h2>
+      </div>
+      <button class="btn small ghost" data-action="edit-day" data-id="${d.id}">${t("editDay")}</button>
+    </div>
+    <div class="pd-meta">${meta(`${num(d.exercises.length)} ${t("exercisesLabel")}`, `${num(sets)} ${t("setsLabel")}`, `~${num(minutes)} ${t("minutesShort")}`)}</div>
+    <div class="pd-muscles">${muscles.map((m) => `<span class="muscle-chip">${t("m_" + m)}</span>`).join("")}</div>
+    <div class="pd-cols" aria-hidden="true"><span></span><span>${t("sets")} × ${t("repsShort")}</span></div>
+    <ol class="pd-list">${items}</ol>
+  </section>`;
+}
+
+const dayTitle = (d) => d.title || (isAr() ? d.title_ar : d.title_en) || "";
+
+// The week at a glance: training days are numbered in the order you do them.
+function weekStrip(days) {
+  const L = I18N[state.lang];
+  const todayWd = pyWeekday(localISO());
+  const index = new Map(days.map((d, i) => [d.weekday, { d, n: i + 1 }]));
+  const cells = L.dayOrder.map((w) => {
+    const hit = index.get(w);
+    const today = w === todayWd ? " today" : "";
+    if (!hit) return `<li class="wk rest${today}"><span class="wk-day">${L.daysShort[w]}</span><span class="wk-dot" aria-hidden="true"></span><span class="wk-what">${t("rest")}</span></li>`;
+    return `<li class="wk train${today}"><a href="#day-${hit.d.id}" data-action="jump-day" data-id="${hit.d.id}" aria-label="${esc(L.days[w] + ": " + dayTitle(hit.d))}">
+      <span class="wk-day">${L.daysShort[w]}</span><span class="wk-n">${num(hit.n)}</span><span class="wk-what">${esc(dayTitle(hit.d))}</span></a></li>`;
+  }).join("");
+  return `<div class="card week-card"><div class="week-head"><h2>${t("yourWeek")}</h2>
+      <span class="sub">${num(days.length)} ${t("trainingDays")}</span></div>
+    <ol class="week">${cells}</ol></div>`;
+}
+
+function dayEditor(d, usedDays, n) {
   const L = I18N[state.lang];
   const template = isAr() ? d.title_ar : d.title_en;
   const weekdayOptions = L.dayOrder.map((w) =>
     `<option value="${w}" ${w === d.weekday ? "selected" : ""} ${w !== d.weekday && usedDays.has(w) ? "disabled" : ""}>${L.days[w]}</option>`).join("");
-  const isToday = d.weekday === pyWeekday(localISO());
   const rows = d.exercises.map((e, i) => `
     <div class="ex-row">
       <div class="ex-order">
@@ -732,17 +787,19 @@ function dayCard(d, usedDays) {
       </div>
       <button class="icon-btn" data-action="del-ex" data-id="${e.id}" aria-label="delete">✕</button>
     </div>`).join("");
-  return `<div class="card plan-day">
+  return `<section class="card plan-day editing" id="day-${d.id}">
+    <div class="pd-head"><span class="pd-num" aria-hidden="true">${num(n)}</span>
+      <div class="pd-titles"><div class="pd-weekday">${tf("workoutN", { n: num(n) })}</div></div>
+      <button class="btn small" data-action="done-day">${t("doneEditing")}</button></div>
     <div class="day-edit">
       <select class="input day-weekday" data-edit="weekday" data-day="${d.id}">${weekdayOptions}</select>
       <input class="input" data-edit="title" data-day="${d.id}" value="${esc(d.title ?? "")}" placeholder="${esc(d.title ? t("dayName") : template)}" maxlength="40">
       <button class="icon-btn" data-action="del-day" data-id="${d.id}" title="${t("deleteDay")}">🗑</button>
     </div>
-    ${isToday ? `<span class="pill ok" style="display:inline-block;margin-bottom:8px">${t("todayTag")}</span>` : ""}
     ${d.exercises.length ? `<div class="ex-cols"><span></span><span></span><span>${t("sets")} × ${t("repsShort")}</span><span></span></div>${rows}` : `<p class="empty">${t("emptyDay")}</p>`}
     <div class="add-row"><select class="input" id="add-${d.id}">${exerciseOptions()}</select>
       <button class="btn small" data-action="add-ex" data-day="${d.id}">+ ${t("add")}</button></div>
-  </div>`;
+  </section>`;
 }
 
 async function viewPlan() {
@@ -771,7 +828,8 @@ async function viewPlan() {
 
   return `<div class="page-head"><div><h1>${t("plan")}</h1><p class="sub">${esc(nm(plan, "split"))}</p></div>
       <button class="btn small ghost" data-action="start-over">${t("startOver")}</button></div>
-    ${days.map((d) => dayCard(d, used)).join("")}
+    ${weekStrip(days)}
+    ${days.map((d, i) => dayCard(d, used, i + 1)).join("")}
     <div class="card"><h2>+ ${t("addDay")}</h2>
       ${free.length ? `<div class="day-edit">
         <select class="input day-weekday" id="new-day-weekday">${free.map((w) => `<option value="${w}">${L.days[w]}</option>`).join("")}</select>
@@ -1501,6 +1559,9 @@ document.addEventListener("click", async (ev) => {
       state.planMode = null; render();
     } else if (a === "start-over") { state.planMode = "choose"; state.pickedDays = []; window.scrollTo(0, 0); render(); }
     else if (a === "cancel-edit") { state.planMode = null; render(); }
+    else if (a === "edit-day") { state.editDay = Number(el.dataset.id); await render(); document.getElementById(`day-${el.dataset.id}`)?.scrollIntoView({ block: "start", behavior: "smooth" }); }
+    else if (a === "done-day") { const id = state.editDay; state.editDay = null; await render(); document.getElementById(`day-${id}`)?.scrollIntoView({ block: "start" }); }
+    else if (a === "jump-day") { ev.preventDefault(); document.getElementById(`day-${el.dataset.id}`)?.scrollIntoView({ block: "start", behavior: "smooth" }); }
     else if (a === "add-day") {
       const weekday = Number(document.getElementById("new-day-weekday").value);
       const title = document.getElementById("new-day-title").value;

@@ -1,7 +1,8 @@
 /* FitPlan — "iron & chalk"
    Colours come from competition weight plates and each one means something:
    red = protein, yellow = carbs, green = fat, blue = water.
-   Everything else is iron (ink) and chalk (paper). */
+   Violet is the heavy resistance band: it marks training (your week, today's
+   session, finished sets, progress). Everything else is iron (ink) and chalk (paper). */
 
 /* ------------------------------------------------------------------ tokens */
 :root,
@@ -20,6 +21,9 @@
   --carbs: #c99400;       /* yellow plate */
   --fat: #2e8f57;         /* green plate */
   --water: #2f6cc0;       /* blue plate */
+  --accent: #5a3ec8;      /* violet band: training */
+  --accent-text: #ffffff;
+  --accent-soft: #e7e2f8;
   --danger: #c9343a;
   --tint: rgba(29, 35, 39, 0.06);
   --nav-bg: rgba(236, 238, 235, 0.92);
@@ -41,6 +45,9 @@
   --carbs: #e6bd4c;
   --fat: #5cc28a;
   --water: #6fa1e6;
+  --accent: #a796f7;
+  --accent-text: #1b1f22;
+  --accent-soft: #312c4a;
   --danger: #e06a6e;
   --tint: rgba(232, 235, 231, 0.06);
   --nav-bg: rgba(27, 31, 34, 0.92);
@@ -90,7 +97,7 @@ h3 { font-size: var(--t-md); margin: 0; font-weight: 600; }
 /* ------------------------------------------------------------------ header */
 .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: var(--t-lg); }
-.brand-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--ink); color: var(--ink-text); display: grid; place-items: center; }
+.brand-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--accent); color: var(--accent-text); display: grid; place-items: center; }
 .brand-mark svg { width: 20px; height: 20px; }
 .brand b { font-weight: 300; }
 .top-actions { display: flex; gap: 6px; }
@@ -111,6 +118,7 @@ h3 { font-size: var(--t-md); margin: 0; font-weight: 600; }
 .card-head h2 { margin: 0; }
 .pill { font-size: var(--t-xs); padding: 3px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap; font-weight: 500; }
 .pill.ok { background: var(--ink); color: var(--ink-text); }
+.pill.today { background: var(--accent); color: var(--accent-text); font-weight: 600; }
 
 /* ------------------------------------------------------------------ buttons & inputs */
 .btn {
@@ -199,7 +207,7 @@ select option, select optgroup { background: var(--surface); color: var(--text);
 .nav button svg { width: 22px; height: 22px; }
 .nav button.active { color: var(--text); font-weight: 600; }
 .nav button.active svg { stroke-width: 2.4; }
-.nav button.active::after { content: ""; width: 18px; height: 3px; border-radius: 2px; background: var(--ink); margin-top: 1px; }
+.nav button.active::after { content: ""; width: 18px; height: 3px; border-radius: 2px; background: var(--accent); margin-top: 1px; }
 
 /* ------------------------------------------------------------------ today: greeting + session */
 .greet { margin-bottom: 22px; }
@@ -222,7 +230,7 @@ select option, select optgroup { background: var(--surface); color: var(--text);
 
 /* ------------------------------------------------------------------ today: logging sets */
 .progress-line { height: 4px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin: -6px 0 14px; }
-.progress-line i { display: block; height: 100%; background: var(--ink); border-radius: 99px; transition: width .3s; }
+.progress-line i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .3s; }
 .tip { font-size: var(--t-sm); color: var(--muted); margin: 0 0 14px; }
 .ex { padding: 16px 0; border-top: 1px solid var(--border); }
 .ex:first-of-type { border-top: 0; padding-top: 0; }
@@ -243,7 +251,7 @@ select option, select optgroup { background: var(--surface); color: var(--text);
 .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .check { width: 46px; height: 46px; border-radius: var(--r-md); border: 1.5px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; transition: background .15s, color .15s; }
 .check svg { width: 20px; height: 20px; }
-.set-row.done .check { background: var(--ink); border-color: var(--ink); color: var(--ink-text); }
+.set-row.done .check { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
 .set-row.done .stepper { background: transparent; border-color: var(--border); }
 
 /* the plate calculator: the one bold element in the app */
@@ -276,9 +284,47 @@ select option, select optgroup { background: var(--surface); color: var(--text);
 /* ------------------------------------------------------------------ plan */
 .days { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
 .day-chip { border: 1px solid var(--border); background: transparent; border-radius: 999px; min-height: 44px; padding: 8px 16px; cursor: pointer; font-size: var(--t-sm); }
-.day-chip.on { background: var(--ink); color: var(--ink-text); border-color: var(--ink); font-weight: 600; }
+.day-chip.on { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
 .choice-card { display: flex; gap: 14px; align-items: flex-start; }
 .choice-icon { display: none; }
+
+/* ------------------------------------------------------------------ plan: week strip */
+.week-card { padding-bottom: 16px; }
+.week-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.week-head h2 { margin: 0; }
+.week { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.wk > a, .wk.rest { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 2px 8px; border-radius: var(--r-md); min-height: 92px; text-decoration: none; color: inherit; }
+.wk.train > a { background: var(--accent-soft); }
+.wk.train > a:hover { outline: 1.5px solid var(--accent); }
+.wk-day { font-size: var(--t-xs); color: var(--muted); white-space: nowrap; }
+.wk-n { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-text); font-weight: 700; font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+.wk-dot { width: 30px; height: 30px; display: grid; place-items: center; }
+.wk-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--surface-3); }
+.wk-what { font-size: 11px; line-height: 1.3; text-align: center; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+.wk.train .wk-what { color: var(--text); font-weight: 500; }
+.wk.today .wk-day { color: var(--text); font-weight: 700; }
+.wk.today > a, .wk.today.rest { box-shadow: inset 0 0 0 1.5px var(--text); }
+
+/* ------------------------------------------------------------------ plan: day cards */
+.plan-day { scroll-margin-top: 16px; }
+.plan-day.is-today { border: 2px solid var(--accent); }
+.pd-head { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; margin-bottom: 10px; }
+.pd-num { width: 40px; height: 40px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--accent); color: var(--accent-text); font-weight: 700; font-size: var(--t-lg); font-variant-numeric: tabular-nums; }
+.pd-titles { min-width: 0; }
+.pd-weekday { font-size: var(--t-sm); color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.pd-title { margin: 0; font-size: var(--t-xl); line-height: 1.25; }
+.pd-meta { color: var(--muted); font-size: var(--t-sm); margin-bottom: 10px; }
+.pd-muscles { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.muscle-chip { font-size: var(--t-xs); padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text); }
+.pd-cols { display: flex; justify-content: space-between; font-size: var(--t-xs); color: var(--muted); padding: 0 0 6px; }
+.pd-list { list-style: none; margin: 0; padding: 0; }
+.pd-ex { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); }
+.pd-i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--accent); color: var(--accent); font-size: var(--t-xs); font-weight: 700; font-variant-numeric: tabular-nums; }
+.pd-name { font-size: var(--t-md); font-weight: 500; line-height: 1.4; }
+.pd-sr { font-size: var(--t-md); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.plan-day.editing { border-style: dashed; border-color: var(--accent); }
+.plan-day.editing .pd-head { margin-bottom: 14px; }
+
 .day-edit { display: grid; grid-template-columns: 140px 1fr auto; gap: 8px; align-items: center; margin-bottom: 14px; }
 .ex-cols, .ex-row { display: grid; grid-template-columns: 30px 1fr 156px 40px; gap: 8px; align-items: center; }
 .ex-cols { font-size: var(--t-xs); color: var(--muted); padding-bottom: 6px; }
@@ -429,8 +475,8 @@ details[open] summary { margin-bottom: 14px; }
 /* ------------------------------------------------------------------ chart */
 .chart { width: 100%; height: 160px; }
 .chart .grid { stroke: var(--border); }
-.chart .line { fill: none; stroke: var(--text); stroke-width: 2.5; }
-.chart .dot { fill: var(--text); }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.chart .dot { fill: var(--accent); }
 .chart text { fill: var(--muted); font-size: 10px; }
 
 /* ------------------------------------------------------------------ toast */

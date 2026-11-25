@@ -16,7 +16,7 @@ Everything else is neutral:
 - **Light ("chalk")**: background `#eceeeb`, panels `#f8f9f7`, text and primary actions in iron `#1d2327`.
 - **Dark ("rubber floor")**: slate `#1b1f22` (not pure black), panels `#23282c`, text and primary actions in chalk `#e8ebe7`.
 
-There is no separate brand accent. Primary buttons, selected chips and checked sets use the ink colour, so the plate colours stay meaningful.
+A third colour marks training: **violet**, after the heavy resistance band (`#5a3ec8` light, `#a796f7` dark). It is used only for the workout side of the app: the logo, the week strip, workout numbers, today's session, finished sets, the workout progress bar and the strength chart. It sits apart from all four plate colours, so it never reads as a nutrient. Primary buttons stay ink.
 
 ## Type
 - **Readex Pro** for everything (Arabic and Latin), weights 300–700.
@@ -30,6 +30,11 @@ There is no separate brand accent. Primary buttons, selected chips and checked s
 - No drop shadows; one 1 px border.
 - Facts are spaced apart in a row (`meta()` helper), never joined with dots.
 - No emoji in headings or labels. The only emoji is the 💪 reaction, because it is the reaction itself.
+
+## The plan page
+- **Your week** comes first: seven cells, training days numbered in the order you do them, rest days quiet, today outlined. Tapping a day jumps to it.
+- Each day reads like a workout card: number, weekday, name, then the facts (exercises, sets, about how long) and the muscles it hits. Exercises are a numbered list with sets × reps aligned on one side.
+- Editing is a separate mode behind **Edit**, so the page you look at every day isn't a wall of inputs. A day with no exercises opens in edit mode.
 
 ## The one bold element
 **The plate calculator.** Under every barbell exercise, a drawing of one side of the bar shows which plates to load, in plate colours, and updates live as the weight changes. It is decoration that does a job lifters actually need.
