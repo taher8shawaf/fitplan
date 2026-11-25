@@ -1,8 +1,9 @@
 /* FitPlan — "iron & chalk"
    Colours come from competition weight plates and each one means something:
    red = protein, yellow = carbs, green = fat, blue = water.
-   Violet is the heavy resistance band: it marks training (your week, today's
-   session, finished sets, progress). Everything else is iron (ink) and chalk (paper). */
+   Turf green (the sled track) marks training: your week, today's session,
+   finished sets, progress. It is a yellow-green lime, kept apart from the
+   bluish fat green. Everything else is iron (ink) and chalk (paper). */
 
 /* ------------------------------------------------------------------ tokens */
 :root,
@@ -21,9 +22,9 @@
   --carbs: #c99400;       /* yellow plate */
   --fat: #2e8f57;         /* green plate */
   --water: #2f6cc0;       /* blue plate */
-  --accent: #5a3ec8;      /* violet band: training */
+  --accent: #4a7a0c;      /* turf green: training */
   --accent-text: #ffffff;
-  --accent-soft: #e7e2f8;
+  --accent-soft: #e3edd2;
   --danger: #c9343a;
   --tint: rgba(29, 35, 39, 0.06);
   --nav-bg: rgba(236, 238, 235, 0.92);
@@ -45,9 +46,9 @@
   --carbs: #e6bd4c;
   --fat: #5cc28a;
   --water: #6fa1e6;
-  --accent: #a796f7;
+  --accent: #c2ec55;
   --accent-text: #1b1f22;
-  --accent-soft: #312c4a;
+  --accent-soft: #2f3a22;
   --danger: #e06a6e;
   --tint: rgba(232, 235, 231, 0.06);
   --nav-bg: rgba(27, 31, 34, 0.92);

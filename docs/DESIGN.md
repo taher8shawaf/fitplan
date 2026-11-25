@@ -16,7 +16,7 @@ Everything else is neutral:
 - **Light ("chalk")**: background `#eceeeb`, panels `#f8f9f7`, text and primary actions in iron `#1d2327`.
 - **Dark ("rubber floor")**: slate `#1b1f22` (not pure black), panels `#23282c`, text and primary actions in chalk `#e8ebe7`.
 
-A third colour marks training: **violet**, after the heavy resistance band (`#5a3ec8` light, `#a796f7` dark). It is used only for the workout side of the app: the logo, the week strip, workout numbers, today's session, finished sets, the workout progress bar and the strength chart. It sits apart from all four plate colours, so it never reads as a nutrient. Primary buttons stay ink.
+A third colour marks training: **turf green**, after the sled track on a gym floor (`#4a7a0c` light, `#c2ec55` dark). It is used only for the workout side of the app: the logo, the week strip, workout numbers, today's session, finished sets, the workout progress bar and the strength chart. It is a yellow-green lime, kept clearly apart from the bluish green used for fat, and it never appears in the nutrition views. Primary buttons stay ink.
 
 ## Type
 - **Readex Pro** for everything (Arabic and Latin), weights 300–700.
